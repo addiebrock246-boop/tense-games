@@ -130,7 +130,7 @@
       <header class="hero">
         <div class="hero-left">
           <h1>✨ English Tense Master ✨</h1>
-          <p class="tagline">सभी प्रकार: Affirmative, Negative, Interrogative, Double Interrogative</p>
+          <p class="tagline">Affirmative, Negative, Yes/No Q, WH-Q – सब कुछ</p>
         </div>
         <div class="timer-box"><span>⏱️</span> <span id="timerDisplay">00:00:00</span></div>
       </header>
@@ -271,19 +271,19 @@
       document.getElementById('feedback').innerText = '⚠️ नए सवाल की जनरेशन विफल।';
     }
 
-    // UPDATED: now includes sentence type randomization
+    // UPDATED: now with correct definitions – Double Interrogative = WH-question
     async function tryGenerateQuestion(tense) {
       const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
       let systemPrompt, userPrompt;
       
       if (currentSection === 'active-passive') {
-        // For active-passive, keep it simple – mostly affirmative, but can include negatives occasionally
+        // For active-passive, mainly affirmative and negative
         const types = ['affirmative', 'negative'];
         const type = types[Math.floor(Math.random() * types.length)];
         systemPrompt = `Generate a new ${type} active voice English sentence not in: [${usedList}]. Return JSON: { "active": "..." }`;
         userPrompt = `Generate a ${type} active voice sentence.`;
       } else {
-        // Randomly pick a sentence type: affirmative, negative, interrogative, double interrogative
+        // Four types: affirmative, negative, interrogative (Yes/No), double interrogative (WH-question)
         const types = ['affirmative', 'negative', 'interrogative', 'double interrogative'];
         const type = types[Math.floor(Math.random() * types.length)];
         
@@ -297,8 +297,8 @@
         Definitions:
         - affirmative: normal positive sentence (e.g., "वह स्कूल जाता है।")
         - negative: negative sentence (e.g., "वह स्कूल नहीं जाता।")
-        - interrogative: question (e.g., "क्या वह स्कूल जाता है?")
-        - double interrogative: negative question (e.g., "क्या वह स्कूल नहीं जाता?")`;
+        - interrogative: Yes/No question, starting with "क्या" (e.g., "क्या वह स्कूल जाता है?")
+        - double interrogative: WH-question, using question words like "क्यों", "कब", "कैसे", "कहाँ", "कौन", "किसने", "किसको", "क्या" (when not yes/no), etc. (e.g., "वह स्कूल क्यों जाता है?")`;
         userPrompt = `Generate a ${type} Hindi sentence.`;
       }
       
@@ -320,12 +320,10 @@
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // Helper: clean text for comparison
     function cleanText(str) {
       return str.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
     }
 
-    // ===== PERFECTED VALIDATION =====
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -352,15 +350,13 @@ CRITICAL TIME EXPRESSION MAPPING (never violate these):
 - "आज रात" → "tonight"
 - "कल सुबह" (future) → "tomorrow morning"
 - "कल सुबह" (past) → "yesterday morning"
-- "सुबह" alone (future/present) can be "morning" or "in the morning", both fine.
 
 GRAMMAR RULES:
-- Check articles carefully. A singular countable noun (like 'movie', 'park') needs an article (a/an/the) unless it's determined by a possessive or demonstrative. So "watch movie" is INCORRECT because 'movie' is singular countable and lacks an article; it should be "watch a movie" or "watch the movie". However, if the user writes "watch movies" (plural), that's fine.
-- Prepositions: "watch a movie tonight" / "watch a movie at night" etc. are natural; don't be pedantic.
+- Check articles carefully. A singular countable noun needs an article unless a determiner is present.
+- Prepositions: natural usage is fine.
 - DO NOT change the time expression incorrectly.
-- If the user's answer has the correct time expression and correct tense, but only a small mistake like missing article, mark INCORRECT but your "correct_translation" must keep the same time expression.
-
-IMPORTANT: Before marking INCORRECT, check if your own "correct_translation" is essentially the same as the user's answer (ignoring punctuation and capitalization). If it is, mark CORRECT instead.
+- If the user's answer has the correct time expression and correct tense, but only a small mistake like missing article, mark INCORRECT but keep the same time expression in your correction.
+- Before marking INCORRECT, verify that your own "correct_translation" is not identical to the user's answer (ignoring punctuation/case). If identical, mark CORRECT.
 
 Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }.`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
