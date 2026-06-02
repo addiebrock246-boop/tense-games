@@ -20,14 +20,48 @@
     .main-container { width: 100%; max-width: 1200px; display: flex; gap: 20px; align-items: flex-start; }
     .game-column { flex: 1 1 60%; }
     .assistant-column { flex: 1 1 35%; display: flex; flex-direction: column; gap: 10px; }
-    .hero h1 { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(to right, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
-    .tagline { color: #b3b3cc; font-size: 1.1rem; margin-bottom: 40px; font-weight: 500; text-align: center; }
+
+    /* Hero + Timer */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .hero-left { flex: 1; }
+    .hero-left h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #f7971e, #ffd200);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.2rem;
+    }
+    .tagline { color: #b3b3cc; font-size: 1.1rem; font-weight: 500; }
+    .timer-box {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 20px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    /* Menu */
     .menu-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
     .menu-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 20px 10px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .menu-card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.15); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.3); }
     .card-icon { font-size: 2.5rem; margin-bottom: 8px; }
     .menu-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; color: #fff; }
     .menu-card p { font-size: 0.8rem; color: #ccccdd; }
+
+    /* Game Panel */
     .game-panel { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideUp 0.4s ease; width: 100%; }
     @keyframes slideUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
     .question-display { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; margin-bottom: 20px; font-size: 1.3rem; font-weight: 600; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05); }
@@ -44,6 +78,8 @@
     .score-display { background: rgba(255,255,255,0.15); display: inline-block; padding: 8px 25px; border-radius: 40px; font-weight: 600; margin-bottom: 15px; font-size: 1rem; }
     .back-btn { background: rgba(255,255,255,0.2); border: none; padding: 10px 22px; border-radius: 50px; font-weight: 600; color: white; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
     .back-btn:hover { background: rgba(255,255,255,0.35); }
+
+    /* Assistant */
     .assistant-card { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; height: 100%; }
     .assistant-header { font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: center; }
     .chat-area { flex: 1; overflow-y: auto; max-height: 400px; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.25); border-radius: 15px; display: flex; flex-direction: column; gap: 10px; }
@@ -57,14 +93,61 @@
     .chat-message.ai .option-buttons { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
     .option-btn { padding: 6px 14px; border: none; border-radius: 20px; background: #f7971e; color: #1a1a2e; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
     .option-btn:hover { background: #ffd200; }
-    @media (max-width: 850px) { .main-container { flex-direction: column; } .game-column, .assistant-column { flex: 1 1 auto; width: 100%; } .chat-area { max-height: 250px; } }
-    @media (max-width: 550px) { .hero h1 { font-size: 2rem; } .menu-container { grid-template-columns: 1fr 1fr; gap: 10px; } .answer-section { flex-direction: column; } }
+
+    /* Congratulations Popup */
+    .congrats-popup {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      color: #1a1a2e;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      z-index: 1000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+    }
+    .congrats-popup.show {
+      transform: translateX(-50%) scale(1);
+    }
+
+    @media (max-width: 850px) { 
+      .main-container { flex-direction: column; } 
+      .game-column, .assistant-column { flex: 1 1 auto; width: 100%; } 
+      .chat-area { max-height: 250px; } 
+      .hero { flex-direction: column; text-align: center; }
+      .timer-box { margin-top: 10px; }
+    }
+    @media (max-width: 550px) { 
+      .hero-left h1 { font-size: 2rem; } 
+      .menu-container { grid-template-columns: 1fr 1fr; gap: 10px; } 
+      .answer-section { flex-direction: column; } 
+    }
   </style>
 </head>
 <body>
+  <!-- Congratulations popup -->
+  <div id="congratsPopup" class="congrats-popup">
+    <span id="congratsText"></span>
+  </div>
+
   <div class="main-container">
     <div class="game-column">
-      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">अब AI सटीक अनुवाद देगा – न कोई कम, न कोई ज़्यादा</p></header>
+      <header class="hero">
+        <div class="hero-left">
+          <h1>✨ English Tense Master ✨</h1>
+          <p class="tagline">अब AI सटीक अनुवाद देगा – न कोई कम, न कोई ज़्यादा</p>
+        </div>
+        <div class="timer-box">
+          <span>⏱️</span>
+          <span id="timerDisplay">00:00:00</span>
+        </div>
+      </header>
+
       <div id="menu" class="menu-container">
         <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
@@ -72,6 +155,7 @@
         <div class="menu-card" onclick="startSection('mix')"><div class="card-icon">🎯</div><h2>Mixed (All)</h2><p>तीनों टेंस, सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('active-passive')"><div class="card-icon">🔄</div><h2>Active ↔ Passive</h2><p>Voice conversion</p></div>
       </div>
+
       <div id="game-area" style="display: none;">
         <div class="game-panel">
           <div class="question-display"><span id="question-text"></span></div>
@@ -113,6 +197,53 @@
       { role: "assistant", content: "नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और पूरी व्याख्या करूंगा।" }
     ];
 
+    // ========== टाइमर & कंग्रेचुलेशन ==========
+    const timerDisplay = document.getElementById('timerDisplay');
+    let startTime = Date.now();
+    let totalPausedTime = 0;
+    let hideTime = null;
+    let lastCongratHour = 0;
+
+    function updateTimer() {
+      const now = Date.now();
+      const elapsedMs = now - startTime - totalPausedTime - (document.hidden && hideTime ? (now - hideTime) : 0);
+      const totalSec = Math.floor(elapsedMs / 1000);
+      const hours = Math.floor(totalSec / 3600);
+      const mins = Math.floor((totalSec % 3600) / 60);
+      const secs = totalSec % 60;
+      timerDisplay.textContent = 
+        String(hours).padStart(2,'0') + ':' + 
+        String(mins).padStart(2,'0') + ':' + 
+        String(secs).padStart(2,'0');
+
+      if (hours > lastCongratHour) {
+        lastCongratHour = hours;
+        showCongratsPopup(hours);
+      }
+    }
+
+    function showCongratsPopup(hour) {
+      const popup = document.getElementById('congratsPopup');
+      document.getElementById('congratsText').textContent = 
+        `🎉 Congratulations! You've studied for ${hour} hour${hour > 1 ? 's' : ''}! Keep going! 🎉`;
+      popup.classList.add('show');
+      setTimeout(() => popup.classList.remove('show'), 4000);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        hideTime = Date.now();
+      } else {
+        if (hideTime) {
+          totalPausedTime += Date.now() - hideTime;
+          hideTime = null;
+        }
+      }
+    });
+
+    setInterval(updateTimer, 1000);
+
+    // ========== API Key ==========
     function askForApiKey() {
       return new Promise((resolve) => {
         const key = prompt("🔑 अपनी Groq API Key डालें:");
