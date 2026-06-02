@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Fixed Assistant</title>
+  <title>English Tense Master – Next after wrong answer</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -64,7 +64,7 @@
 <body>
   <div class="main-container">
     <div class="game-column">
-      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">अब असिस्टेंट हर गलती सही ढंग से समझाएगा</p></header>
+      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">गलत होने पर भी Next दबाकर आगे बढ़ें</p></header>
       <div id="menu" class="menu-container">
         <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
@@ -228,18 +228,26 @@
           score++; document.getElementById('score').innerText = score;
           document.getElementById('feedback').innerHTML = '✅ Correct! ' + (result.message || '');
           document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
-          document.getElementById('next-btn').style.display = 'inline-block'; document.getElementById('submit-btn').disabled = true;
+          document.getElementById('next-btn').style.display = 'inline-block'; 
+          document.getElementById('submit-btn').disabled = true;
         } else {
+          // Incorrect: दिखाएँ फीडबैक + सही उत्तर + Next बटन
           const correct = result.correct_translation || result.correct_passive || '';
           document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
           document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
-          // असिस्टेंट को समझाने भेजें – लेकिन सख्त निर्देश के साथ
+          // Next बटन दिखाएँ और Submit को disabled रखें
+          document.getElementById('next-btn').style.display = 'inline-block';
+          document.getElementById('submit-btn').disabled = true;
+          // असिस्टेंट को गलती समझाने भेजें
           explainMistake(userAnswer, correct, currentSection === 'active-passive' ? currentQuestion.active : currentQuestion.hindi);
         }
-      } catch (err) { document.getElementById('feedback').innerText = 'Error: ' + err.message; document.getElementById('submit-btn').disabled = false; }
+      } catch (err) { 
+        document.getElementById('feedback').innerText = 'Error: ' + err.message; 
+        document.getElementById('submit-btn').disabled = false; 
+      }
     });
 
-    // ==================== असिस्टेंट को गलती समझाने का फंक्शन (सख्त प्रॉम्प्ट) ====================
+    // ==================== असिस्टेंट को गलती समझाने का फंक्शन ====================
     async function explainMistake(wrongAnswer, correctAnswer, questionText) {
       const isPassive = currentSection === 'active-passive';
       const userMessageContent = isPassive
@@ -250,8 +258,7 @@
       appendMessage('user', userMessageContent);
       
       try {
-        // बहुत सख्त system prompt जो गलत सलाह न दे
-        const strictSystemPrompt = `You are a strict English grammar teacher. Your job is to point out the user's mistake based on the correct answer provided. Never say that an incorrect sentence is correct. Always mention specific grammar rules: missing articles (a/an/the), subject-verb agreement, tense errors, wrong prepositions, etc. Use Hinglish. Be polite but accurate.`;
+        const strictSystemPrompt = `You are a strict English grammar teacher. Your job is to point out the user's mistake based on the correct answer provided. Never say that an incorrect sentence is correct. Always mention specific grammar rules: missing articles (a/an/the), subject-verb agreement, tense errors, wrong prepositions, unnatural collocations, etc. Use Hinglish. Be polite but accurate.`;
         const reply = await callGroqAPIForAssistant([
           { role: "system", content: strictSystemPrompt },
           ...assistantMessages
@@ -271,7 +278,7 @@
       document.getElementById('submit-btn').disabled = false;
     }
 
-    // ==================== AI असिस्टेंट (मैन्युअल) – और सख्त ====================
+    // ==================== AI असिस्टेंट (मैन्युअल) ====================
     const chatArea = document.getElementById('chat-area');
     const assistantInput = document.getElementById('assistant-input');
     const sendBtn = document.getElementById('send-assistant-btn');
@@ -309,8 +316,7 @@
         showWordOptions(text);
       } else {
         try {
-          // सामान्य चैट के लिए भी सख्त system prompt
-          const strictChatPrompt = `You are a helpful English learning assistant. Always answer in Hinglish. You must always give correct grammar advice. Never tell a user that an incorrect sentence is correct. If a user writes a sentence with a missing article (a/an/the), point it out and correct it. Keep it short and friendly.`;
+          const strictChatPrompt = `You are a helpful English learning assistant. Always answer in Hinglish. You must always give correct grammar advice. Never tell a user that an incorrect sentence is correct. If a user writes a sentence with a missing article, wrong collocation, or unnatural phrasing, point it out and correct it. Keep it short and friendly.`;
           const reply = await callGroqAPIForAssistant([
             { role: "system", content: strictChatPrompt },
             ...assistantMessages
