@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master - AI Generated Questions</title>
+  <title>English Tense Master with AI Assistant</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -17,142 +17,266 @@
       padding: 20px;
       color: #fff;
     }
-    .main-container { width: 100%; max-width: 800px; text-align: center; }
+    .main-container {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    /* गेम पैनल (बाएँ ओर) */
+    .game-column {
+      flex: 1 1 60%;
+    }
+    /* AI असिस्टेंट पैनल (दाएँ ओर) */
+    .assistant-column {
+      flex: 1 1 35%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
     .hero h1 {
       font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem;
       background: linear-gradient(to right, #f7971e, #ffd200);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-align: center;
     }
-    .tagline { color: #b3b3cc; font-size: 1.1rem; margin-bottom: 40px; font-weight: 500; }
+    .tagline { color: #b3b3cc; font-size: 1.1rem; margin-bottom: 40px; font-weight: 500; text-align: center; }
     .menu-container {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px; margin-bottom: 20px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px; margin-bottom: 20px;
     }
     .menu-card {
       background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
       border: 1px solid rgba(255,255,255,0.15); border-radius: 24px;
-      padding: 30px 15px; cursor: pointer; transition: all 0.3s ease;
+      padding: 20px 10px; cursor: pointer; transition: all 0.3s ease;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
     .menu-card:hover {
       transform: translateY(-8px); background: rgba(255,255,255,0.15);
       box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.3);
     }
-    .card-icon { font-size: 2.8rem; margin-bottom: 10px; }
-    .menu-card h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; color: #fff; }
-    .menu-card p { font-size: 0.85rem; color: #ccccdd; }
+    .card-icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .menu-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; color: #fff; }
+    .menu-card p { font-size: 0.8rem; color: #ccccdd; }
     .game-panel {
       background: rgba(255,255,255,0.07); backdrop-filter: blur(16px);
       border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
-      padding: 35px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
       animation: slideUp 0.4s ease;
+      width: 100%;
     }
     @keyframes slideUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
     .question-display {
-      background: rgba(0,0,0,0.3); border-radius: 20px; padding: 25px 20px;
-      margin-bottom: 25px; font-size: 1.4rem; font-weight: 600; min-height: 90px;
+      background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px;
+      margin-bottom: 20px; font-size: 1.3rem; font-weight: 600; min-height: 80px;
       display: flex; align-items: center; justify-content: center;
       border: 1px solid rgba(255,255,255,0.05);
     }
     .answer-section { display: flex; gap: 12px; margin-bottom: 20px; }
-    #user-input {
-      flex: 1; padding: 14px 22px; font-size: 1rem;
+    #user-input, #assistant-input {
+      flex: 1; padding: 12px 20px; font-size: 1rem;
       background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
       border-radius: 50px; outline: none; color: white; font-weight: 500; transition: 0.3s;
     }
-    #user-input::placeholder { color: #aaa; }
-    #user-input:focus {
+    #user-input::placeholder, #assistant-input::placeholder { color: #aaa; }
+    #user-input:focus, #assistant-input:focus {
       border-color: #f7971e; box-shadow: 0 0 20px rgba(247,151,30,0.3);
     }
     .submit-btn {
-      padding: 14px 30px; background: linear-gradient(45deg, #f7971e, #ffd200);
+      padding: 12px 25px; background: linear-gradient(45deg, #f7971e, #ffd200);
       border: none; border-radius: 50px; font-weight: 700; color: #1a1a2e;
-      cursor: pointer; transition: 0.3s; font-size: 1rem; letter-spacing: 0.5px;
+      cursor: pointer; transition: 0.3s; font-size: 1rem;
     }
     .submit-btn:hover { transform: scale(1.03); box-shadow: 0 10px 25px rgba(247,151,30,0.4); }
-    .feedback-message { font-size: 1.2rem; font-weight: 700; margin: 10px 0; min-height: 35px; }
-    .alt-message { color: #ffd966; margin-bottom: 20px; font-size: 0.95rem; }
+    .feedback-message { font-size: 1.1rem; font-weight: 700; margin: 10px 0; min-height: 30px; }
+    .alt-message { color: #ffd966; margin-bottom: 15px; font-size: 0.9rem; }
     .score-display {
       background: rgba(255,255,255,0.15); display: inline-block;
-      padding: 10px 30px; border-radius: 40px; font-weight: 600; margin-bottom: 20px; font-size: 1.1rem;
+      padding: 8px 25px; border-radius: 40px; font-weight: 600; margin-bottom: 15px; font-size: 1rem;
     }
     .back-btn {
-      background: rgba(255,255,255,0.2); border: none; padding: 12px 28px;
-      border-radius: 50px; font-weight: 600; color: white; cursor: pointer; transition: 0.3s; font-size: 0.95rem;
+      background: rgba(255,255,255,0.2); border: none; padding: 10px 22px;
+      border-radius: 50px; font-weight: 600; color: white; cursor: pointer; transition: 0.3s; font-size: 0.9rem;
     }
     .back-btn:hover { background: rgba(255,255,255,0.35); }
+
+    /* असिस्टेंट कार्ड */
+    .assistant-card {
+      background: rgba(255,255,255,0.07); backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .assistant-header {
+      font-size: 1.3rem; font-weight: 700;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 400px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chat-message {
+      padding: 8px 15px;
+      border-radius: 15px;
+      max-width: 80%;
+      word-wrap: break-word;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .chat-message.user {
+      align-self: flex-end;
+      background: rgba(247,151,30,0.2);
+      border: 1px solid rgba(247,151,30,0.4);
+      color: #fff;
+    }
+    .chat-message.ai {
+      align-self: flex-start;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .assistant-input-area {
+      display: flex;
+      gap: 10px;
+    }
+    #assistant-input {
+      flex: 1;
+    }
+    .send-btn {
+      padding: 12px 20px;
+      background: #3182ce;
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .send-btn:hover { background: #2b6cb0; }
+
+    /* रिस्पॉन्सिव */
+    @media (max-width: 850px) {
+      .main-container {
+        flex-direction: column;
+      }
+      .game-column, .assistant-column {
+        flex: 1 1 auto;
+        width: 100%;
+      }
+      .chat-area {
+        max-height: 250px;
+      }
+    }
     @media (max-width: 550px) {
       .hero h1 { font-size: 2rem; }
-      .menu-container { grid-template-columns: 1fr 1fr; gap: 15px; }
+      .menu-container { grid-template-columns: 1fr 1fr; gap: 10px; }
       .answer-section { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="main-container">
-    <header class="hero">
-      <h1>✨ English Tense Master ✨</h1>
-      <p class="tagline">AI हर बार नया सवाल बनाएगा – कोई प्री-लोडेड सवाल नहीं</p>
-    </header>
+    <!-- लेफ्ट साइड: गेम -->
+    <div class="game-column">
+      <header class="hero">
+        <h1>✨ English Tense Master ✨</h1>
+        <p class="tagline">हर सवाल AI बनाएगा – बिना प्री-लोडेड डेटा</p>
+      </header>
 
-    <!-- मेनू -->
-    <div id="menu" class="menu-container">
-      <div class="menu-card" onclick="startSection('present')">
-        <div class="card-icon">📘</div>
-        <h2>Present Tense</h2>
-        <p>AI बनाएगा सवाल</p>
+      <!-- मेनू -->
+      <div id="menu" class="menu-container">
+        <div class="menu-card" onclick="startSection('present')">
+          <div class="card-icon">📘</div>
+          <h2>Present Tense</h2>
+          <p>AI बनाएगा सवाल</p>
+        </div>
+        <div class="menu-card" onclick="startSection('past')">
+          <div class="card-icon">📙</div>
+          <h2>Past Tense</h2>
+          <p>AI बनाएगा सवाल</p>
+        </div>
+        <div class="menu-card" onclick="startSection('future')">
+          <div class="card-icon">📗</div>
+          <h2>Future Tense</h2>
+          <p>AI बनाएगा सवाल</p>
+        </div>
+        <div class="menu-card" onclick="startSection('mix')">
+          <div class="card-icon">🎯</div>
+          <h2>Mixed Tenses</h2>
+          <p>AI बनाएगा सवाल</p>
+        </div>
+        <div class="menu-card" onclick="startSection('active-passive')">
+          <div class="card-icon">🔄</div>
+          <h2>Active ↔ Passive</h2>
+          <p>AI बनाएगा सवाल</p>
+        </div>
       </div>
-      <div class="menu-card" onclick="startSection('past')">
-        <div class="card-icon">📙</div>
-        <h2>Past Tense</h2>
-        <p>AI बनाएगा सवाल</p>
-      </div>
-      <div class="menu-card" onclick="startSection('future')">
-        <div class="card-icon">📗</div>
-        <h2>Future Tense</h2>
-        <p>AI बनाएगा सवाल</p>
-      </div>
-      <div class="menu-card" onclick="startSection('mix')">
-        <div class="card-icon">🎯</div>
-        <h2>Mixed Tenses</h2>
-        <p>AI बनाएगा सवाल</p>
-      </div>
-      <div class="menu-card" onclick="startSection('active-passive')">
-        <div class="card-icon">🔄</div>
-        <h2>Active ↔ Passive</h2>
-        <p>AI बनाएगा सवाल</p>
+
+      <!-- गेम एरिया (छुपा हुआ) -->
+      <div id="game-area" style="display: none;">
+        <div class="game-panel">
+          <div class="question-display">
+            <span id="question-text"></span>
+          </div>
+          <div class="answer-section">
+            <input type="text" id="user-input" placeholder="अपना उत्तर लिखें..." autocomplete="off">
+            <button id="submit-btn" class="submit-btn">✓ Check</button>
+          </div>
+          <div id="feedback" class="feedback-message"></div>
+          <div id="alternatives" class="alt-message"></div>
+          <div class="score-display">
+            <span>⭐ Score: <strong id="score">0</strong></span>
+          </div>
+          <button id="back-btn" class="back-btn" onclick="goBack()">← Back to Menu</button>
+        </div>
       </div>
     </div>
 
-    <!-- गेम एरिया (शुरू में छिपा) -->
-    <div id="game-area" class="game-area" style="display: none;">
-      <div class="game-panel">
-        <div class="question-display">
-          <span id="question-text"></span>
+    <!-- राइट साइड: AI असिस्टेंट -->
+    <div class="assistant-column">
+      <div class="assistant-card">
+        <div class="assistant-header">
+          🤖 Ask AI Assistant
         </div>
-        <div class="answer-section">
-          <input type="text" id="user-input" placeholder="अपना उत्तर लिखें..." autocomplete="off">
-          <button id="submit-btn" class="submit-btn">✓ Check</button>
+        <div id="chat-area" class="chat-area">
+          <div class="chat-message ai">नमस्ते! मुझसे कोई भी हिंदी शब्द का मतलब, अंग्रेज़ी अनुवाद या ग्रामर पूछें।</div>
         </div>
-        <div id="feedback" class="feedback-message"></div>
-        <div id="alternatives" class="alt-message"></div>
-        <div class="score-display">
-          <span>⭐ Score: <strong id="score">0</strong></span>
+        <div class="assistant-input-area">
+          <input type="text" id="assistant-input" placeholder="कुछ भी पूछें..." autocomplete="off">
+          <button id="send-assistant-btn" class="send-btn">➤</button>
         </div>
-        <button id="back-btn" class="back-btn" onclick="goBack()">← Back to Menu</button>
       </div>
     </div>
   </div>
 
   <script>
-    // ========== ऐप लॉजिक – पूरी तरह AI आधारित ==========
-    let currentSection = '';
-    let usedQuestions = [];        // पूछे जा चुके हिंदी/एक्टिव वाक्य (दोहराने से बचने के लिए)
-    let currentQuestion = null;   // वर्तमान में दिख रहा प्रश्न
-    let score = 0;
+    // ========== ग्लोबल वेरिएबल ==========
     let apiKey = '';
+    let currentSection = '';
+    let currentQuestion = null;
+    let usedQuestions = [];
+    let score = 0;
 
-    // 🔑 API Key लेने का फंक्शन
+    // चैट हिस्ट्री (असिस्टेंट के लिए)
+    let assistantMessages = [
+      { role: "assistant", content: "नमस्ते! मुझसे कोई भी हिंदी शब्द का मतलब, अंग्रेज़ी अनुवाद या ग्रामर पूछें।" }
+    ];
+
+    // ========== API Key ==========
     function askForApiKey() {
       return new Promise((resolve) => {
         const key = prompt("🔑 अपनी Groq API Key डालें (यह सिर्फ इस सेशन के लिए याद रहेगी):");
@@ -166,7 +290,40 @@
       });
     }
 
-    // 📚 सेक्शन शुरू करें – सीधे AI से पहला सवाल लाएँ
+    // ========== Groq API कॉल (सामान्य) ==========
+    async function callGroqAPI(messages, temperature = 0.3, maxTokens = 300) {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: messages,
+          temperature: temperature,
+          max_tokens: maxTokens,
+          response_format: { type: "json_object" }   // गेम के लिए ज़रूरी, असिस्टेंट के लिए हटाएँगे
+        })
+      });
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error?.message || 'API error');
+      }
+      const data = await response.json();
+      let content = data.choices[0].message.content.trim();
+      // JSON पार्सिंग (गेम वाले कॉल के लिए)
+      if (content.startsWith('```json')) content = content.slice(7, -3).trim();
+      else if (content.startsWith('```')) content = content.slice(3, -3).trim();
+      try {
+        return JSON.parse(content);
+      } catch {
+        // असिस्टेंट के लिए सादा टेक्स्ट
+        return content;
+      }
+    }
+
+    // ========== गेम सेक्शन शुरू करें ==========
     async function startSection(section) {
       if (!apiKey) {
         const gotKey = await askForApiKey();
@@ -179,78 +336,28 @@
       document.getElementById('menu').style.display = 'none';
       document.getElementById('game-area').style.display = 'block';
 
-      // पहला सवाल AI से लाएँ
-      document.getElementById('feedback').innerText = 'AI आपके लिए सवाल बना रहा है...';
+      document.getElementById('feedback').innerText = 'AI नया सवाल बना रहा है...';
       document.getElementById('submit-btn').disabled = true;
       await generateAndDisplayQuestion();
       document.getElementById('submit-btn').disabled = false;
     }
 
-    // 🔙 मेनू पर वापस जाएँ
     function goBack() {
       document.getElementById('game-area').style.display = 'none';
       document.getElementById('menu').style.display = '';
       currentQuestion = null;
     }
 
-    // 🤖 Groq API को कॉल करने का सामान्य फंक्शन
-    async function callGroqAPI(messages) {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
-          messages: messages,
-          temperature: 0.3,
-          max_tokens: 300,
-          response_format: { type: "json_object" }  // JSON mode ऑन
-        })
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error?.message || 'API error');
-      }
-
-      const data = await response.json();
-      let content = data.choices[0].message.content.trim();
-
-      // JSON को साफ करें
-      if (content.startsWith('```json')) {
-        content = content.slice(7, -3).trim();
-      } else if (content.startsWith('```')) {
-        content = content.slice(3, -3).trim();
-      }
-
-      // सुरक्षित पार्सिंग
-      try {
-        return JSON.parse(content);
-      } catch (e) {
-        const firstBrace = content.indexOf('{');
-        const lastBrace = content.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
-          const jsonPart = content.substring(firstBrace, lastBrace + 1);
-          return JSON.parse(jsonPart);
-        }
-        throw new Error('Invalid JSON from AI: ' + content);
-      }
-    }
-
-    // 🧠 AI से नया सवाल बनवाएँ और स्क्रीन पर दिखाएँ
     async function generateAndDisplayQuestion() {
       const tense = currentSection === 'mix' ? 'all' : currentSection;
       let systemPrompt, userPrompt;
-
       if (currentSection === 'active-passive') {
         const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
-        systemPrompt = `Generate a new active voice English sentence (simple to moderate difficulty) for passive voice practice. Do NOT use these already used sentences: [${usedList}]. Reply with JSON: { "active": "..." }`;
+        systemPrompt = `Generate a new active voice English sentence (simple to moderate) not in: [${usedList}]. Return JSON: { "active": "..." }`;
         userPrompt = "Generate.";
       } else {
         const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
-        systemPrompt = `Generate a new Hindi sentence for ${tense} tense English translation practice. The sentence should be natural and varied. Do NOT use these already used sentences: [${usedList}]. Reply with JSON: { "hindi": "..." }`;
+        systemPrompt = `Generate a Hindi sentence for ${tense} tense, not in: [${usedList}]. Return JSON: { "hindi": "..." }`;
         userPrompt = "Generate.";
       }
 
@@ -259,7 +366,6 @@
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ]);
-
         if (result.hindi) {
           currentQuestion = { hindi: result.hindi };
           usedQuestions.push(result.hindi);
@@ -267,18 +373,15 @@
           currentQuestion = { active: result.active };
           usedQuestions.push(result.active);
         } else {
-          throw new Error('AI did not return a question.');
+          throw new Error('No question generated');
         }
-
         displayQuestion();
       } catch (err) {
-        document.getElementById('feedback').innerText = '❌ AI सवाल नहीं बना पाया। कृपया दोबारा कोशिश करें या API key जाँचें।';
+        document.getElementById('feedback').innerText = '❌ AI सवाल नहीं बना पाया। कृपया दोबारा कोशिश करें।';
         document.getElementById('submit-btn').disabled = false;
-        // गेम एरिया में वापसी का विकल्प
       }
     }
 
-    // 🖥️ सवाल को स्क्रीन पर दिखाएँ
     function displayQuestion() {
       const qText = document.getElementById('question-text');
       if (currentSection === 'active-passive') {
@@ -291,7 +394,7 @@
       document.getElementById('alternatives').innerText = '';
     }
 
-    // ✅ "Check" बटन दबाने पर
+    // ========== उत्तर जाँच ==========
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) {
         const gotKey = await askForApiKey();
@@ -299,19 +402,18 @@
       }
       const userAnswer = document.getElementById('user-input').value.trim();
       if (!userAnswer) return;
-
       if (!currentQuestion) {
-        document.getElementById('feedback').innerText = 'कोई सवाल मौजूद नहीं। कृपया सेक्शन दोबारा शुरू करें।';
+        document.getElementById('feedback').innerText = 'कोई सवाल मौजूद नहीं।';
         return;
       }
 
       let systemPrompt, userPrompt;
       if (currentSection === 'active-passive') {
-        systemPrompt = `Check if the passive voice is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
+        systemPrompt = `Check passive voice. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
         const tense = currentSection === 'mix' ? 'all' : currentSection;
-        systemPrompt = `Check if the English translation is correct. Hindi: "${currentQuestion.hindi}". Tense: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
+        systemPrompt = `Check English translation. Hindi: "${currentQuestion.hindi}". Tense: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `User English: "${userAnswer}"`;
       }
 
@@ -321,17 +423,13 @@
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ]);
-
         if (result.status === 'CORRECT') {
           score++;
           document.getElementById('score').innerText = score;
           document.getElementById('feedback').innerHTML = '✅ Correct! ' + (result.message || '');
           if (result.alternatives && result.alternatives.length) {
             document.getElementById('alternatives').innerText = 'Other ways: ' + result.alternatives.join(', ');
-          } else {
-            document.getElementById('alternatives').innerText = '';
           }
-          // अगला सवाल AI से लाएँ
           setTimeout(async () => {
             document.getElementById('feedback').innerText = 'AI अगला सवाल बना रहा है...';
             await generateAndDisplayQuestion();
@@ -349,7 +447,69 @@
       }
     });
 
-    // ⌨️ एंटर की से भी सबमिट
+    // ========== AI असिस्टेंट लॉजिक ==========
+    const chatArea = document.getElementById('chat-area');
+    const assistantInput = document.getElementById('assistant-input');
+    const sendBtn = document.getElementById('send-assistant-btn');
+
+    function appendMessage(role, content) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-message ${role}`;
+      msgDiv.textContent = content;
+      chatArea.appendChild(msgDiv);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    // शुरुआती मैसेज दिखाएँ (पहले से DOM में है, पर assistantMessages में भी)
+    async function sendAssistantMessage() {
+      const text = assistantInput.value.trim();
+      if (!text) return;
+      if (!apiKey) {
+        const gotKey = await askForApiKey();
+        if (!gotKey) return;
+      }
+
+      // यूज़र मैसेज दिखाएँ और हिस्ट्री में डालें
+      appendMessage('user', text);
+      assistantMessages.push({ role: "user", content: text });
+      assistantInput.value = '';
+      sendBtn.disabled = true;
+
+      try {
+        // असिस्टेंट के लिए JSON mode नहीं, सादा टेक्स्ट चाहिए
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              { role: "system", content: "You are a helpful English learning assistant. Answer the user's questions about Hindi words meanings, English translations, grammar tips, etc. Keep answers short and helpful." },
+              ...assistantMessages
+            ],
+            temperature: 0.7,
+            max_tokens: 250
+          })
+        });
+        if (!response.ok) throw new Error('API error');
+        const data = await response.json();
+        const reply = data.choices[0].message.content.trim();
+        appendMessage('ai', reply);
+        assistantMessages.push({ role: "assistant", content: reply });
+      } catch (err) {
+        appendMessage('ai', '⚠️ Error: ' + err.message);
+      }
+      sendBtn.disabled = false;
+    }
+
+    sendBtn.addEventListener('click', sendAssistantMessage);
+    assistantInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendAssistantMessage();
+    });
+
+    // गेम इनपुट के लिए एंटर
     document.getElementById('user-input').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') document.getElementById('submit-btn').click();
     });
