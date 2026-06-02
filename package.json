@@ -1,7 +1,0 @@
-{
-  "name": "english-tens-game",
-  "version": "1.0.0",
-  "description": "Interactive English tense and voice practice app with Groq AI",
-  "private": true,
-  "type": "module"
-}
