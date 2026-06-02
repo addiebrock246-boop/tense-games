@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Accurate Translation (No More Bakchodi)</title>
+  <title>English Tense Master – Accurate Translation</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -312,7 +312,7 @@
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // ===== ULTIMATE FIXED VALIDATION – NO MORE BAKCHODI =====
+    // ===== ULTIMATE FIXED VALIDATION – NO MORE TIME EXPRESSION ERRORS =====
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -324,19 +324,32 @@
         systemPrompt = `Check if the passive voice sentence is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
-        systemPrompt = `You are an English teacher. Evaluate the user's English translation of the Hindi sentence.
+        systemPrompt = `You are an English teacher. Evaluate the user's translation of the Hindi sentence.
 
-ESSENTIAL RULES:
-1. ACCEPT any translation that correctly conveys the meaning and has natural grammar.
-2. DO NOT mark something as INCORRECT unless there is a clear grammatical mistake or a missing element that changes the meaning.
-3. PREPOSITIONS: "play in a park", "play at a park" are BOTH correct. Do not penalize.
-4. ARTICLES: Only require an article if the singular countable noun has no other determiner. "in a new park" is correct.
-5. TENSE: Must match the Hindi tense. But accept minor variations like "he will play" / "he will be playing" if the context permits.
-6. COMPARISON: If you suggest a "correct_translation" and it is essentially the same as the user's answer (ignoring case and minor word order), you MUST mark the user as CORRECT. Never call the same sentence incorrect.
-7. Be helpful, not pedantic.
+CRITICAL TIME EXPRESSION MAPPING (never violate these):
+- "कल" in past context → "yesterday"
+- "कल" in future context → "tomorrow"
+- "परसों" (past) → "the day before yesterday"
+- "परसों" (future) → "the day after tomorrow"
+- "आज" → "today"
+- "शाम" (when combined with time like "कल शाम") → "evening" or "night" (both acceptable, prefer "evening" for exactness)
+- "कल शाम" (future) → "tomorrow evening" / "tomorrow night" (BOTH ARE CORRECT)
+- "कल रात" (future) → "tomorrow night"
+- "कल रात" (past) → "last night"
+- "आज रात" → "tonight"
+- "कल सुबह" (future) → "tomorrow morning"
+- "कल सुबह" (past) → "yesterday morning"
+- "सुबह" alone (future/present) can be "morning" or "in the morning", both fine.
+
+GRAMMAR RULES:
+- Check articles carefully. A singular countable noun (like 'movie', 'park') needs an article (a/an/the) unless it's determined by a possessive or demonstrative. So "watch movie" is INCORRECT because 'movie' is singular countable and lacks an article; it should be "watch a movie" or "watch the movie". However, if the user writes "watch movies" (plural), that's fine.
+- Prepositions: "watch a movie tonight" / "watch a movie at night" etc. are natural; don't be pedantic.
+- DO NOT change the time expression incorrectly. If the Hindi says "कल शाम" (future), the correct translation must use "tomorrow evening" or "tomorrow night". NEVER use "tonight" for "कल". If the user writes "tomorrow night", it is CORRECT for time (only the article may be missing).
+- If the user's answer has the correct time expression and correct tense, but only a small mistake like missing article, mark INCORRECT but your "correct_translation" must keep the same time expression. Example: Hindi: "वह कल शाम को फिल्म देखेगा।" User: "he will watch movie tomorrow night" → INCORRECT (missing 'a'), correct_translation: "He will watch a movie tomorrow night." (NOT "tonight").
+- Be fair and consistent. If the only error is a missing article, mention that in the message.
 
 Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }.
-If INCORRECT, the correct_translation must be DIFFERENT from the user's answer. If CORRECT, message can be empty or a short praise.`;
+If INCORRECT, message should state the mistake briefly. If CORRECT, message can be "Well done!" or empty.`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
       }
       
@@ -350,7 +363,7 @@ If INCORRECT, the correct_translation must be DIFFERENT from the user's answer. 
           document.getElementById('next-btn').style.display = 'inline-block'; 
         } else {
           const correct = result.correct_translation || result.correct_passive || '';
-          // Double-check: if correct is identical to userAnswer, force CORRECT
+          // Security: if correct is identical to userAnswer (ignoring spaces/case), force CORRECT
           if (correct.replace(/\s+/g, ' ').trim().toLowerCase() === userAnswer.replace(/\s+/g, ' ').trim().toLowerCase()) {
             score++; document.getElementById('score').innerText = score;
             document.getElementById('feedback').innerHTML = '✅ Correct! (AI ने गलती से INCORRECT बता दिया था, लेकिन आपका जवाब सही है)';
