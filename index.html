@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Next after wrong answer</title>
+  <title>English Tense Master – Complete Hinglish Explanation</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -64,7 +64,7 @@
 <body>
   <div class="main-container">
     <div class="game-column">
-      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">गलत होने पर भी Next दबाकर आगे बढ़ें</p></header>
+      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">गलती होने पर असिस्टेंट पूरी हिंग्लिश में समझाएगा</p></header>
       <div id="menu" class="menu-container">
         <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
@@ -92,7 +92,7 @@
       <div class="assistant-card">
         <div class="assistant-header">🤖 Ask AI Assistant</div>
         <div id="chat-area" class="chat-area">
-          <div class="chat-message ai">नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और हमेशा सही व्याकरण बताऊंगा।</div>
+          <div class="chat-message ai">नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और पूरी व्याख्या करूंगा।</div>
         </div>
         <div class="assistant-input-area">
           <input type="text" id="assistant-input" placeholder="कुछ भी पूछें..." autocomplete="off">
@@ -110,7 +110,7 @@
     let usedQuestions = [];
     let score = 0;
     let assistantMessages = [
-      { role: "assistant", content: "नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और हमेशा सही व्याकरण बताऊंगा।" }
+      { role: "assistant", content: "नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और पूरी व्याख्या करूंगा।" }
     ];
 
     function askForApiKey() {
@@ -136,11 +136,12 @@
       try { return JSON.parse(content); } catch { throw new Error('Invalid JSON from AI'); }
     }
 
-    async function callGroqAPIForAssistant(messages, temperature = 0.7) {
+    // असिस्टेंट के लिए API कॉल – max_tokens बढ़ाकर 600 ताकि पूरा जवाब आए
+    async function callGroqAPIForAssistant(messages, temperature = 0.7, maxTokens = 600) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-        body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages, temperature, max_tokens: 300 })
+        body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages, temperature, max_tokens: maxTokens })
       });
       if (!response.ok) throw new Error('API error');
       const data = await response.json();
@@ -231,11 +232,9 @@
           document.getElementById('next-btn').style.display = 'inline-block'; 
           document.getElementById('submit-btn').disabled = true;
         } else {
-          // Incorrect: दिखाएँ फीडबैक + सही उत्तर + Next बटन
           const correct = result.correct_translation || result.correct_passive || '';
           document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
           document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
-          // Next बटन दिखाएँ और Submit को disabled रखें
           document.getElementById('next-btn').style.display = 'inline-block';
           document.getElementById('submit-btn').disabled = true;
           // असिस्टेंट को गलती समझाने भेजें
@@ -258,11 +257,12 @@
       appendMessage('user', userMessageContent);
       
       try {
-        const strictSystemPrompt = `You are a strict English grammar teacher. Your job is to point out the user's mistake based on the correct answer provided. Never say that an incorrect sentence is correct. Always mention specific grammar rules: missing articles (a/an/the), subject-verb agreement, tense errors, wrong prepositions, unnatural collocations, etc. Use Hinglish. Be polite but accurate.`;
+        // सख्त system prompt – हिंग्लिश, पूरी व्याख्या, गलत सलाह नहीं
+        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish (a natural mix of Hindi and English, NOT pure Hindi). Example: "Aapne yahan 'the' use kiya jo galat hai, kyunki..." Always point out specific grammar mistakes: missing articles, wrong prepositions, unnatural collocations, tense errors, etc. Provide a complete, detailed explanation. Never say a wrong sentence is correct.`;
         const reply = await callGroqAPIForAssistant([
           { role: "system", content: strictSystemPrompt },
           ...assistantMessages
-        ], 0.7);
+        ], 0.7, 600); // maxTokens 600 ताकि पूरा जवाब आए
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
       } catch (err) {
@@ -316,11 +316,11 @@
         showWordOptions(text);
       } else {
         try {
-          const strictChatPrompt = `You are a helpful English learning assistant. Always answer in Hinglish. You must always give correct grammar advice. Never tell a user that an incorrect sentence is correct. If a user writes a sentence with a missing article, wrong collocation, or unnatural phrasing, point it out and correct it. Keep it short and friendly.`;
+          const strictChatPrompt = `You are a helpful English learning assistant. Always answer in Hinglish (mix of Hindi and English, like "Aapne 'the' use kiya jo galat hai..."). Use English for grammar terms and example sentences. Never write in pure Hindi. Keep it friendly and detailed.`;
           const reply = await callGroqAPIForAssistant([
             { role: "system", content: strictChatPrompt },
             ...assistantMessages
-          ], 0.8);
+          ], 0.8, 600); // maxTokens बढ़ाया
           appendMessage('ai', reply);
           assistantMessages.push({ role: "assistant", content: reply });
         } catch (err) {
@@ -354,7 +354,7 @@
         const reply = await callGroqAPIForAssistant([
           { role: "system", content: "You are a helpful English-Hindi dictionary. Answer in Hinglish. Be accurate." },
           { role: "user", content: prompt }
-        ], 0.7);
+        ], 0.7, 300); // short answers
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
       } catch (err) {
