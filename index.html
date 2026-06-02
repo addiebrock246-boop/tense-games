@@ -214,7 +214,6 @@
       document.getElementById('game-area').style.display = 'block';
 
       if (section === 'mix') {
-        // तीनों को मिलाएँ
         currentQuestions = [
           ...questionBank.present,
           ...questionBank.past,
@@ -244,7 +243,6 @@
         return;
       }
       currentQuestion = currentQuestions.pop();
-      // usedQuestions में add करते हैं ताकि AI उन्हें दोबारा न बनाए
       if (currentSection === 'active-passive') {
         usedQuestions.push(currentQuestion.active);
       } else {
@@ -265,7 +263,7 @@
       document.getElementById('alternatives').innerText = '';
     }
 
-    // Groq API को सीधे ब्राउज़र से कॉल
+    // Groq API को सीधे ब्राउज़र से कॉल – अब llma-3.1-8b-instant का प्रयोग करें
     async function callGroqAPI(messages) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -274,7 +272,7 @@
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'llama3-70b-8192',
+          model: 'llama-3.1-8b-instant',  // यह मॉडल हमेशा उपलब्ध और फ्री है
           messages: messages,
           temperature: 0.3,
           max_tokens: 300
@@ -286,7 +284,6 @@
       }
       const data = await response.json();
       let content = data.choices[0].message.content.trim();
-      // JSON पार्स करो (कभी-कभी ```json``` में लिपटा होता है)
       if (content.startsWith('```json')) content = content.slice(7, -3).trim();
       else if (content.startsWith('```')) content = content.slice(3, -3).trim();
       return JSON.parse(content);
