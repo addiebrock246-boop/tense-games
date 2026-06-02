@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master with AI Assistant</title>
+  <title>English Tense Master – All Subtypes</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -137,15 +137,15 @@
     <div class="game-column">
       <header class="hero">
         <h1>✨ English Tense Master ✨</h1>
-        <p class="tagline">हर सवाल AI बनाएगा – बिना प्री-लोडेड डेटा</p>
+        <p class="tagline">सभी उप-प्रकारों (Indefinite, Continuous, Perfect, Perfect Continuous) के सवाल</p>
       </header>
 
       <div id="menu" class="menu-container">
-        <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>AI बनाएगा सवाल</p></div>
-        <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>AI बनाएगा सवाल</p></div>
-        <div class="menu-card" onclick="startSection('future')"><div class="card-icon">📗</div><h2>Future Tense</h2><p>AI बनाएगा सवाल</p></div>
-        <div class="menu-card" onclick="startSection('mix')"><div class="card-icon">🎯</div><h2>Mixed Tenses</h2><p>AI बनाएगा सवाल</p></div>
-        <div class="menu-card" onclick="startSection('active-passive')"><div class="card-icon">🔄</div><h2>Active ↔ Passive</h2><p>AI बनाएगा सवाल</p></div>
+        <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
+        <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
+        <div class="menu-card" onclick="startSection('future')"><div class="card-icon">📗</div><h2>Future Tense</h2><p>सभी प्रकार</p></div>
+        <div class="menu-card" onclick="startSection('mix')"><div class="card-icon">🎯</div><h2>Mixed (All)</h2><p>तीनों टेंस, सभी प्रकार</p></div>
+        <div class="menu-card" onclick="startSection('active-passive')"><div class="card-icon">🔄</div><h2>Active ↔ Passive</h2><p>Voice conversion</p></div>
       </div>
 
       <div id="game-area" style="display: none;">
@@ -168,7 +168,7 @@
       <div class="assistant-card">
         <div class="assistant-header">🤖 Ask AI Assistant</div>
         <div id="chat-area" class="chat-area">
-          <div class="chat-message ai">नमस्ते! मुझसे कोई भी हिंदी शब्द का मतलब, अंग्रेज़ी अनुवाद या ग्रामर पूछें।</div>
+          <div class="chat-message ai">नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें।</div>
         </div>
         <div class="assistant-input-area">
           <input type="text" id="assistant-input" placeholder="कुछ भी पूछें..." autocomplete="off">
@@ -185,17 +185,17 @@
     let usedQuestions = [];
     let score = 0;
     let assistantMessages = [
-      { role: "assistant", content: "नमस्ते! मुझसे कोई भी हिंदी शब्द का मतलब, अंग्रेज़ी अनुवाद या ग्रामर पूछें।" }
+      { role: "assistant", content: "नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें।" }
     ];
 
     function askForApiKey() {
       return new Promise((resolve) => {
-        const key = prompt("🔑 अपनी Groq API Key डालें (यह सिर्फ इस सेशन के लिए याद रहेगी):");
+        const key = prompt("🔑 अपनी Groq API Key डालें:");
         if (key && key.trim().length > 0) {
           apiKey = key.trim();
           resolve(true);
         } else {
-          alert("API Key ज़रूरी है! बिना key के AI काम नहीं करेगा।");
+          alert("API Key ज़रूरी है!");
           resolve(false);
         }
       });
@@ -291,7 +291,7 @@
           attempts++;
         }
       }
-      document.getElementById('feedback').innerText = '⚠️ नए सवाल की जनरेशन विफल। कृपया सेक्शन दोबारा शुरू करें।';
+      document.getElementById('feedback').innerText = '⚠️ नए सवाल की जनरेशन विफल।';
     }
 
     async function tryGenerateQuestion(tense) {
@@ -301,7 +301,18 @@
         systemPrompt = `Generate a new active voice English sentence (simple to moderate) not in: [${usedList}]. Return JSON: { "active": "..." }`;
         userPrompt = "Generate.";
       } else {
-        systemPrompt = `Generate a new Hindi sentence for ${tense} tense, not in: [${usedList}]. Return JSON: { "hindi": "..." }`;
+        // मुख्य बदलाव: टेंस के सभी उप-प्रकार शामिल करने का निर्देश
+        let tenseDescription = '';
+        if (tense === 'present') {
+          tenseDescription = 'any present tense subtype: Simple Present (habitual actions), Present Continuous (actions happening now), Present Perfect (actions completed recently), Present Perfect Continuous (actions that started in past and still continuing).';
+        } else if (tense === 'past') {
+          tenseDescription = 'any past tense subtype: Simple Past (completed actions), Past Continuous (ongoing past actions), Past Perfect (actions completed before another past action), Past Perfect Continuous (ongoing past actions up to a point).';
+        } else if (tense === 'future') {
+          tenseDescription = 'any future tense subtype: Simple Future (will/shall), Future Continuous (will be + ing), Future Perfect (will have + past participle), Future Perfect Continuous (will have been + ing).';
+        } else if (tense === 'all') {
+          tenseDescription = 'randomly choose one of the following tense/subtype combinations: Present (Simple, Continuous, Perfect, Perfect Continuous), Past (Simple, Continuous, Perfect, Perfect Continuous), Future (Simple, Continuous, Perfect, Perfect Continuous).';
+        }
+        systemPrompt = `Generate a natural Hindi sentence for English translation practice. The tense/subtype should be: ${tenseDescription}. The sentence must NOT be any of these already used: [${usedList}]. Ensure the Hindi verb form clearly matches the subtype. Return JSON: { "hindi": "..." }`;
         userPrompt = "Generate.";
       }
       const result = await callGroqAPIForGame([
@@ -338,11 +349,7 @@
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
         const tense = currentSection === 'mix' ? 'all' : currentSection;
-        // नया सख़्त प्रॉम्प्ट – हिंदी क्रिया के आधार पर टेंस पहचानो
-        systemPrompt = `You are an English teacher. Analyze the Hindi sentence carefully. Identify its tense by looking at the verb form: if the verb ends with 'रहा है/रही है/रहे हैं' it's continuous; otherwise it's simple (habitual or general fact). Do NOT confuse simple present with present continuous. Then check the user's English translation. If incorrect, give the correct translation in the SAME tense as the Hindi original. Example: "वह हर दिन नए दोस्त बनाता है" is simple present → "He makes new friends every day". 
-Hindi: "${currentQuestion.hindi}"
-Tense hint: ${tense}
-Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
+        systemPrompt = `You are an English teacher. Analyze the Hindi sentence carefully. Identify its exact tense and subtype by looking at the verb form. For example, 'रहा है/रही है/रहे हैं' indicates continuous, 'चुका है/चुकी है/चुके हैं' indicates perfect, 'रहा था' indicates past continuous, 'रहा होगा' future continuous, etc. Do NOT confuse simple present with present continuous. Then check the user's English translation. If incorrect, provide the correct translation preserving the original tense and subtype. Hindi: "${currentQuestion.hindi}". Tense hint: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `User English: "${userAnswer}"`;
       }
 
@@ -402,7 +409,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
       sendBtn.disabled = true;
       try {
         const reply = await callGroqAPIForAssistant([
-          { role: "system", content: "You are a helpful English learning assistant. Answer the user's questions about Hindi words meanings, English translations, grammar tips, etc. Keep answers short and helpful." },
+          { role: "system", content: "You are a helpful English learning assistant. Answer questions about Hindi word meanings, English translations, and grammar tips. Keep answers concise." },
           ...assistantMessages
         ]);
         appendMessage('ai', reply);
