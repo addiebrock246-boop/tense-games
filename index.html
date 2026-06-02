@@ -194,7 +194,7 @@
       { role: "assistant", content: "नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और पूरी व्याख्या करूंगा।" }
     ];
 
-    // ========== टाइमर & कंग्रेचुलेशन (बिल्कुल नया जोड़) ==========
+    // ========== टाइमर & कंग्रेचुलेशन ==========
     const timerDisplay = document.getElementById('timerDisplay');
     let startTime = Date.now();
     let totalPausedTime = 0;
@@ -239,7 +239,6 @@
     });
 
     setInterval(updateTimer, 1000);
-    // टाइमर यहीं खत्म
 
     // ========== API Key ==========
     function askForApiKey() {
@@ -336,27 +335,32 @@
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // ==================== वैलिडेशन – सटीक और स्वाभाविक अनुवाद ====================
+    // ==================== वैलिडेशन – सटीक और स्वाभाविक अनुवाद (FIXED) ====================
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
       if (!userAnswer) return;
       if (!currentQuestion) { document.getElementById('feedback').innerText = 'कोई सवाल मौजूद नहीं।'; return; }
+      
       let systemPrompt, userPrompt;
       if (currentSection === 'active-passive') {
         systemPrompt = `Check if the passive voice sentence is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
-        systemPrompt = `You are an English teacher. Your task is to check if the user's English translation accurately and naturally conveys the meaning of the Hindi sentence.  
-Important rules:
-1. Do NOT add words that are not explicitly present in the Hindi sentence (e.g., do not add "now" unless the Hindi has "अब").  
-2. If the user misses an article (a/an/the) before a singular countable noun, mark as INCORRECT and provide the correct translation with an appropriate article (use "a" unless the context demands "the").  
-3. If the user's translation is correct, mark as CORRECT.  
-4. Provide a brief message explaining the mistake, if any.  
+        // IMPROVED SYSTEM PROMPT – अब सही जवाब गलत नहीं बताएगा
+        systemPrompt = `You are an expert English teacher. Check if the user's English translation accurately and naturally conveys the meaning of the Hindi sentence.
+
+Rules:
+1. Do NOT add or expect words that are not explicitly present in the Hindi sentence (e.g., do not add "now" unless the Hindi has "अब").
+2. Articles (a/an/the): Mark INCORRECT only if a singular countable noun lacks an article AND there is no other determiner (like my, his, their, this, that, etc.) before it. For example, "their family" is already correct without an article.
+3. Time expressions: Translate naturally. "कल" in past context means "yesterday", not "the day before yesterday". "परसों" means "the day before yesterday" or "the day after tomorrow" depending on context.
+4. Be lenient with minor variations (e.g., "travelling" vs "traveling", "had been" vs "had been") as long as the core tense and meaning are correct.
+5. Provide a clear, brief message explaining the mistake, if any. If the answer is correct, simply say "Correct!" and show any alternative translations.
 
 Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
       }
+      
       document.getElementById('submit-btn').disabled = true;
       try {
         const result = await callGroqAPIForGame([{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }]);
