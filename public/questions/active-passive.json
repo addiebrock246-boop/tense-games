@@ -1,0 +1,7 @@
+[
+  { "active": "He writes a letter.", "passive_hint": "A letter is written by him." },
+  { "active": "She is singing a song.", "passive_hint": "A song is being sung by her." },
+  { "active": "They completed the project.", "passive_hint": "The project was completed by them." },
+  { "active": "The chef will cook dinner.", "passive_hint": "Dinner will be cooked by the chef." },
+  { "active": "Someone stole my pen.", "passive_hint": "My pen was stolen (by someone)." }
+]
