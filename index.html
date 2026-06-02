@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – All Subtypes</title>
+  <title>English Tense Master – All Subtypes + Assistant</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -17,129 +17,55 @@
       padding: 20px;
       color: #fff;
     }
-    .main-container {
-      width: 100%;
-      max-width: 1200px;
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-    }
+    .main-container { width: 100%; max-width: 1200px; display: flex; gap: 20px; align-items: flex-start; }
     .game-column { flex: 1 1 60%; }
     .assistant-column { flex: 1 1 35%; display: flex; flex-direction: column; gap: 10px; }
-    .hero h1 {
-      font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem;
-      background: linear-gradient(to right, #f7971e, #ffd200);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      text-align: center;
-    }
+    .hero h1 { font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(to right, #f7971e, #ffd200); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
     .tagline { color: #b3b3cc; font-size: 1.1rem; margin-bottom: 40px; font-weight: 500; text-align: center; }
-    .menu-container {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px; margin-bottom: 20px;
-    }
-    .menu-card {
-      background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.15); border-radius: 24px;
-      padding: 20px 10px; cursor: pointer; transition: all 0.3s ease;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    .menu-card:hover {
-      transform: translateY(-8px); background: rgba(255,255,255,0.15);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.3);
-    }
+    .menu-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .menu-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 20px 10px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .menu-card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.15); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.3); }
     .card-icon { font-size: 2.5rem; margin-bottom: 8px; }
     .menu-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; color: #fff; }
     .menu-card p { font-size: 0.8rem; color: #ccccdd; }
-    .game-panel {
-      background: rgba(255,255,255,0.07); backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
-      padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-      animation: slideUp 0.4s ease; width: 100%;
-    }
+    .game-panel { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideUp 0.4s ease; width: 100%; }
     @keyframes slideUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
-    .question-display {
-      background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px;
-      margin-bottom: 20px; font-size: 1.3rem; font-weight: 600; min-height: 80px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
+    .question-display { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; margin-bottom: 20px; font-size: 1.3rem; font-weight: 600; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05); }
     .answer-section { display: flex; gap: 12px; margin-bottom: 20px; }
-    #user-input, #assistant-input {
-      flex: 1; padding: 12px 20px; font-size: 1rem;
-      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 50px; outline: none; color: white; font-weight: 500; transition: 0.3s;
-    }
+    #user-input, #assistant-input { flex: 1; padding: 12px 20px; font-size: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; outline: none; color: white; font-weight: 500; transition: 0.3s; }
     #user-input::placeholder, #assistant-input::placeholder { color: #aaa; }
-    #user-input:focus, #assistant-input:focus {
-      border-color: #f7971e; box-shadow: 0 0 20px rgba(247,151,30,0.3);
-    }
-    .submit-btn {
-      padding: 12px 25px; background: linear-gradient(45deg, #f7971e, #ffd200);
-      border: none; border-radius: 50px; font-weight: 700; color: #1a1a2e;
-      cursor: pointer; transition: 0.3s; font-size: 1rem;
-    }
+    #user-input:focus, #assistant-input:focus { border-color: #f7971e; box-shadow: 0 0 20px rgba(247,151,30,0.3); }
+    .submit-btn { padding: 12px 25px; background: linear-gradient(45deg, #f7971e, #ffd200); border: none; border-radius: 50px; font-weight: 700; color: #1a1a2e; cursor: pointer; transition: 0.3s; font-size: 1rem; }
     .submit-btn:hover { transform: scale(1.03); box-shadow: 0 10px 25px rgba(247,151,30,0.4); }
-    .next-btn {
-      padding: 12px 25px; background: #3182ce; border: none;
-      border-radius: 50px; font-weight: 700; color: white; cursor: pointer;
-      transition: 0.3s; font-size: 1rem; margin-left: 10px;
-    }
+    .next-btn { padding: 12px 25px; background: #3182ce; border: none; border-radius: 50px; font-weight: 700; color: white; cursor: pointer; transition: 0.3s; font-size: 1rem; margin-left: 10px; }
     .next-btn:hover { background: #2b6cb0; }
     .feedback-message { font-size: 1.1rem; font-weight: 700; margin: 10px 0; min-height: 30px; }
     .alt-message { color: #ffd966; margin-bottom: 15px; font-size: 0.9rem; }
-    .score-display {
-      background: rgba(255,255,255,0.15); display: inline-block;
-      padding: 8px 25px; border-radius: 40px; font-weight: 600; margin-bottom: 15px; font-size: 1rem;
-    }
-    .back-btn {
-      background: rgba(255,255,255,0.2); border: none; padding: 10px 22px;
-      border-radius: 50px; font-weight: 600; color: white; cursor: pointer; transition: 0.3s; font-size: 0.9rem;
-    }
+    .score-display { background: rgba(255,255,255,0.15); display: inline-block; padding: 8px 25px; border-radius: 40px; font-weight: 600; margin-bottom: 15px; font-size: 1rem; }
+    .back-btn { background: rgba(255,255,255,0.2); border: none; padding: 10px 22px; border-radius: 50px; font-weight: 600; color: white; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
     .back-btn:hover { background: rgba(255,255,255,0.35); }
-    .assistant-card {
-      background: rgba(255,255,255,0.07); backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-      padding: 20px; display: flex; flex-direction: column; height: 100%;
-    }
+    .assistant-card { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; height: 100%; }
     .assistant-header { font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: center; }
-    .chat-area {
-      flex: 1; overflow-y: auto; max-height: 400px; margin-bottom: 15px;
-      padding: 10px; background: rgba(0,0,0,0.25); border-radius: 15px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .chat-message {
-      padding: 8px 15px; border-radius: 15px; max-width: 80%;
-      word-wrap: break-word; font-size: 0.9rem; line-height: 1.4;
-    }
+    .chat-area { flex: 1; overflow-y: auto; max-height: 400px; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.25); border-radius: 15px; display: flex; flex-direction: column; gap: 10px; }
+    .chat-message { padding: 8px 15px; border-radius: 15px; max-width: 80%; word-wrap: break-word; font-size: 0.9rem; line-height: 1.4; }
     .chat-message.user { align-self: flex-end; background: rgba(247,151,30,0.2); border: 1px solid rgba(247,151,30,0.4); color: #fff; }
     .chat-message.ai { align-self: flex-start; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
     .assistant-input-area { display: flex; gap: 10px; }
     #assistant-input { flex: 1; }
-    .send-btn {
-      padding: 12px 20px; background: #3182ce; border: none;
-      border-radius: 50px; color: white; font-weight: 700; cursor: pointer; transition: 0.3s;
-    }
+    .send-btn { padding: 12px 20px; background: #3182ce; border: none; border-radius: 50px; color: white; font-weight: 700; cursor: pointer; transition: 0.3s; }
     .send-btn:hover { background: #2b6cb0; }
-    @media (max-width: 850px) {
-      .main-container { flex-direction: column; }
-      .game-column, .assistant-column { flex: 1 1 auto; width: 100%; }
-      .chat-area { max-height: 250px; }
-    }
-    @media (max-width: 550px) {
-      .hero h1 { font-size: 2rem; }
-      .menu-container { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .answer-section { flex-direction: column; }
-    }
+    /* बटन वाले मैसेज के लिए */
+    .chat-message.ai .option-buttons { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .option-btn { padding: 6px 14px; border: none; border-radius: 20px; background: #f7971e; color: #1a1a2e; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
+    .option-btn:hover { background: #ffd200; }
+    @media (max-width: 850px) { .main-container { flex-direction: column; } .game-column, .assistant-column { flex: 1 1 auto; width: 100%; } .chat-area { max-height: 250px; } }
+    @media (max-width: 550px) { .hero h1 { font-size: 2rem; } .menu-container { grid-template-columns: 1fr 1fr; gap: 10px; } .answer-section { flex-direction: column; } }
   </style>
 </head>
 <body>
   <div class="main-container">
     <div class="game-column">
-      <header class="hero">
-        <h1>✨ English Tense Master ✨</h1>
-        <p class="tagline">सभी उप-प्रकारों (Indefinite, Continuous, Perfect, Perfect Continuous) के सवाल</p>
-      </header>
-
+      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">सभी उप-प्रकारों के सवाल – AI बनाएगा</p></header>
       <div id="menu" class="menu-container">
         <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
@@ -147,7 +73,6 @@
         <div class="menu-card" onclick="startSection('mix')"><div class="card-icon">🎯</div><h2>Mixed (All)</h2><p>तीनों टेंस, सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('active-passive')"><div class="card-icon">🔄</div><h2>Active ↔ Passive</h2><p>Voice conversion</p></div>
       </div>
-
       <div id="game-area" style="display: none;">
         <div class="game-panel">
           <div class="question-display"><span id="question-text"></span></div>
@@ -179,6 +104,7 @@
   </div>
 
   <script>
+    // ========== ग्लोबल वेरिएबल ==========
     let apiKey = '';
     let currentSection = '';
     let currentQuestion = null;
@@ -191,71 +117,41 @@
     function askForApiKey() {
       return new Promise((resolve) => {
         const key = prompt("🔑 अपनी Groq API Key डालें:");
-        if (key && key.trim().length > 0) {
-          apiKey = key.trim();
-          resolve(true);
-        } else {
-          alert("API Key ज़रूरी है!");
-          resolve(false);
-        }
+        if (key && key.trim().length > 0) { apiKey = key.trim(); resolve(true); }
+        else { alert("API Key ज़रूरी है!"); resolve(false); }
       });
     }
 
+    // ========== API कॉल ==========
     async function callGroqAPIForGame(messages) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
-          messages: messages,
-          temperature: 0.3,
-          max_tokens: 300,
-          response_format: { type: "json_object" }
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages, temperature: 0.3, max_tokens: 300, response_format: { type: "json_object" } })
       });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error?.message || 'API error');
-      }
+      if (!response.ok) { const err = await response.json(); throw new Error(err.error?.message || 'API error'); }
       const data = await response.json();
       let content = data.choices[0].message.content.trim();
       if (content.startsWith('```json')) content = content.slice(7, -3).trim();
       else if (content.startsWith('```')) content = content.slice(3, -3).trim();
-      try {
-        return JSON.parse(content);
-      } catch {
-        throw new Error('Invalid JSON from AI');
-      }
+      try { return JSON.parse(content); } catch { throw new Error('Invalid JSON from AI'); }
     }
 
-    async function callGroqAPIForAssistant(messages) {
+    async function callGroqAPIForAssistant(messages, temperature = 0.7) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 250
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages, temperature, max_tokens: 300 })
       });
       if (!response.ok) throw new Error('API error');
       const data = await response.json();
       return data.choices[0].message.content.trim();
     }
 
-    // ========== गेम ==========
+    // ==================== गेम लॉजिक (वही) ====================
     async function startSection(section) {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
-      currentSection = section;
-      score = 0;
-      usedQuestions = [];
+      currentSection = section; score = 0; usedQuestions = [];
       document.getElementById('score').innerText = score;
       document.getElementById('menu').style.display = 'none';
       document.getElementById('game-area').style.display = 'block';
@@ -266,30 +162,18 @@
       document.getElementById('submit-btn').disabled = false;
     }
 
-    function goBack() {
-      document.getElementById('game-area').style.display = 'none';
-      document.getElementById('menu').style.display = '';
-      currentQuestion = null;
-    }
+    function goBack() { document.getElementById('game-area').style.display = 'none'; document.getElementById('menu').style.display = ''; currentQuestion = null; }
 
     async function generateAndDisplayQuestion() {
       const tense = currentSection === 'mix' ? 'all' : currentSection;
-      let attempts = 0;
-      const maxAttempts = 3;
+      let attempts = 0; const maxAttempts = 3;
       while (attempts < maxAttempts) {
         try {
-          const questionObj = await tryGenerateQuestion(tense);
-          const candidate = currentSection === 'active-passive' ? questionObj.active : questionObj.hindi;
-          if (candidate && !usedQuestions.includes(candidate)) {
-            usedQuestions.push(candidate);
-            currentQuestion = questionObj;
-            displayQuestion();
-            return;
-          }
+          const qObj = await tryGenerateQuestion(tense);
+          const candidate = currentSection === 'active-passive' ? qObj.active : qObj.hindi;
+          if (candidate && !usedQuestions.includes(candidate)) { usedQuestions.push(candidate); currentQuestion = qObj; displayQuestion(); return; }
           attempts++;
-        } catch (err) {
-          attempts++;
-        }
+        } catch { attempts++; }
       }
       document.getElementById('feedback').innerText = '⚠️ नए सवाल की जनरेशन विफल।';
     }
@@ -298,27 +182,18 @@
       const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
       let systemPrompt, userPrompt;
       if (currentSection === 'active-passive') {
-        systemPrompt = `Generate a new active voice English sentence (simple to moderate) not in: [${usedList}]. Return JSON: { "active": "..." }`;
+        systemPrompt = `Generate a new active voice English sentence not in: [${usedList}]. Return JSON: { "active": "..." }`;
         userPrompt = "Generate.";
       } else {
-        // मुख्य बदलाव: टेंस के सभी उप-प्रकार शामिल करने का निर्देश
-        let tenseDescription = '';
-        if (tense === 'present') {
-          tenseDescription = 'any present tense subtype: Simple Present (habitual actions), Present Continuous (actions happening now), Present Perfect (actions completed recently), Present Perfect Continuous (actions that started in past and still continuing).';
-        } else if (tense === 'past') {
-          tenseDescription = 'any past tense subtype: Simple Past (completed actions), Past Continuous (ongoing past actions), Past Perfect (actions completed before another past action), Past Perfect Continuous (ongoing past actions up to a point).';
-        } else if (tense === 'future') {
-          tenseDescription = 'any future tense subtype: Simple Future (will/shall), Future Continuous (will be + ing), Future Perfect (will have + past participle), Future Perfect Continuous (will have been + ing).';
-        } else if (tense === 'all') {
-          tenseDescription = 'randomly choose one of the following tense/subtype combinations: Present (Simple, Continuous, Perfect, Perfect Continuous), Past (Simple, Continuous, Perfect, Perfect Continuous), Future (Simple, Continuous, Perfect, Perfect Continuous).';
-        }
-        systemPrompt = `Generate a natural Hindi sentence for English translation practice. The tense/subtype should be: ${tenseDescription}. The sentence must NOT be any of these already used: [${usedList}]. Ensure the Hindi verb form clearly matches the subtype. Return JSON: { "hindi": "..." }`;
+        let tenseDesc = '';
+        if (tense === 'present') tenseDesc = 'any present subtype (Simple, Continuous, Perfect, Perfect Continuous)';
+        else if (tense === 'past') tenseDesc = 'any past subtype (Simple, Continuous, Perfect, Perfect Continuous)';
+        else if (tense === 'future') tenseDesc = 'any future subtype (Simple, Continuous, Perfect, Perfect Continuous)';
+        else tenseDesc = 'randomly choose among present/past/future subtypes (Simple, Continuous, Perfect, Perfect Continuous)';
+        systemPrompt = `Generate a new Hindi sentence for English translation. Tense/subtype: ${tenseDesc}. Not in: [${usedList}]. Return JSON: { "hindi": "..." }`;
         userPrompt = "Generate.";
       }
-      const result = await callGroqAPIForGame([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ]);
+      const result = await callGroqAPIForGame([{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }]);
       if (result.hindi) return { hindi: result.hindi };
       if (result.active) return { active: result.active };
       throw new Error('No question generated');
@@ -326,15 +201,9 @@
 
     function displayQuestion() {
       const qText = document.getElementById('question-text');
-      if (currentSection === 'active-passive') {
-        qText.innerHTML = `Change to Passive Voice:<br><b>${currentQuestion.active}</b>`;
-      } else {
-        qText.innerHTML = `Translate to English:<br><b>${currentQuestion.hindi}</b>`;
-      }
-      document.getElementById('user-input').value = '';
-      document.getElementById('feedback').innerText = '';
-      document.getElementById('alternatives').innerText = '';
-      document.getElementById('next-btn').style.display = 'none';
+      if (currentSection === 'active-passive') qText.innerHTML = `Change to Passive Voice:<br><b>${currentQuestion.active}</b>`;
+      else qText.innerHTML = `Translate to English:<br><b>${currentQuestion.hindi}</b>`;
+      document.getElementById('user-input').value = ''; document.getElementById('feedback').innerText = ''; document.getElementById('alternatives').innerText = ''; document.getElementById('next-btn').style.display = 'none';
     }
 
     document.getElementById('submit-btn').addEventListener('click', async () => {
@@ -342,40 +211,29 @@
       const userAnswer = document.getElementById('user-input').value.trim();
       if (!userAnswer) return;
       if (!currentQuestion) { document.getElementById('feedback').innerText = 'कोई सवाल मौजूद नहीं।'; return; }
-
       let systemPrompt, userPrompt;
       if (currentSection === 'active-passive') {
-        systemPrompt = `Check if the passive voice is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
+        systemPrompt = `Check passive voice. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
         const tense = currentSection === 'mix' ? 'all' : currentSection;
-        systemPrompt = `You are an English teacher. Analyze the Hindi sentence carefully. Identify its exact tense and subtype by looking at the verb form. For example, 'रहा है/रही है/रहे हैं' indicates continuous, 'चुका है/चुकी है/चुके हैं' indicates perfect, 'रहा था' indicates past continuous, 'रहा होगा' future continuous, etc. Do NOT confuse simple present with present continuous. Then check the user's English translation. If incorrect, provide the correct translation preserving the original tense and subtype. Hindi: "${currentQuestion.hindi}". Tense hint: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
+        systemPrompt = `You are an English teacher. Analyze the Hindi sentence's tense by verb form. Then check the user's English translation. If incorrect, give the correct translation in the SAME tense. Hindi: "${currentQuestion.hindi}". Tense hint: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `User English: "${userAnswer}"`;
       }
-
       document.getElementById('submit-btn').disabled = true;
       try {
-        const result = await callGroqAPIForGame([
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ]);
+        const result = await callGroqAPIForGame([{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }]);
         if (result.status === 'CORRECT') {
-          score++;
-          document.getElementById('score').innerText = score;
+          score++; document.getElementById('score').innerText = score;
           document.getElementById('feedback').innerHTML = '✅ Correct! ' + (result.message || '');
           document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
-          document.getElementById('next-btn').style.display = 'inline-block';
-          document.getElementById('submit-btn').disabled = true;
+          document.getElementById('next-btn').style.display = 'inline-block'; document.getElementById('submit-btn').disabled = true;
         } else {
           document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
-          const correct = result.correct_translation || result.correct_passive || '';
-          document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
+          document.getElementById('alternatives').innerText = result.correct_translation ? 'Correct: ' + result.correct_translation : (result.correct_passive ? 'Correct: ' + result.correct_passive : '');
           document.getElementById('submit-btn').disabled = false;
         }
-      } catch (err) {
-        document.getElementById('feedback').innerText = 'Error: ' + err.message;
-        document.getElementById('submit-btn').disabled = false;
-      }
+      } catch (err) { document.getElementById('feedback').innerText = 'Error: ' + err.message; document.getElementById('submit-btn').disabled = false; }
     });
 
     async function loadNextQuestion() {
@@ -386,42 +244,99 @@
       document.getElementById('submit-btn').disabled = false;
     }
 
-    // ========== असिस्टेंट ==========
+    // ==================== AI असिस्टेंट (नया) ====================
     const chatArea = document.getElementById('chat-area');
     const assistantInput = document.getElementById('assistant-input');
     const sendBtn = document.getElementById('send-assistant-btn');
 
-    function appendMessage(role, content) {
+    function appendMessage(role, content, isHtml = false) {
       const msgDiv = document.createElement('div');
       msgDiv.className = `chat-message ${role}`;
-      msgDiv.textContent = content;
+      if (isHtml) msgDiv.innerHTML = content;
+      else msgDiv.textContent = content;
       chatArea.appendChild(msgDiv);
       chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    // जाँचें कि क्या यह शब्द/वाक्यांश है (बिना प्रश्नवाचक चिह्न और छोटा)
+    function isWordQuery(text) {
+      const trimmed = text.trim();
+      // अगर ? या ! या . से खत्म हो, तो शायद सवाल है
+      if (/[?.!]$/.test(trimmed)) return false;
+      const words = trimmed.split(/\s+/);
+      // 4 से कम शब्द और कोई common question words नहीं
+      if (words.length > 4) return false;
+      const questionWords = ['क्या','क्यों','कैसे','किसने','किसको','कब','कहाँ','कितना'];
+      if (questionWords.some(w => trimmed.toLowerCase().includes(w))) return false;
+      // मोटामोटी सही
+      return true;
     }
 
     async function sendAssistantMessage() {
       const text = assistantInput.value.trim();
       if (!text) return;
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
+
       appendMessage('user', text);
       assistantMessages.push({ role: "user", content: text });
       assistantInput.value = '';
       sendBtn.disabled = true;
+
+      if (isWordQuery(text)) {
+        // बटन वाला मैसेज दिखाओ
+        showWordOptions(text);
+      } else {
+        // सामान्य चैट
+        try {
+          const reply = await callGroqAPIForAssistant([
+            { role: "system", content: "You are a helpful English learning assistant. Answer in Hinglish (mix of Hindi and English). Keep it short and friendly." },
+            ...assistantMessages
+          ], 0.8);
+          appendMessage('ai', reply);
+          assistantMessages.push({ role: "assistant", content: reply });
+        } catch (err) {
+          appendMessage('ai', '⚠️ Error: ' + err.message);
+          assistantMessages.push({ role: "assistant", content: 'Error: ' + err.message });
+        }
+      }
+      sendBtn.disabled = false;
+    }
+
+    function showWordOptions(word) {
+      const html = `"<b>${word}</b>" ke saath kya karna hai?<br>
+        <div class="option-buttons">
+          <button class="option-btn" onclick="handleWordOption('${word.replace(/'/g, "\\'")}', 'hindi-meaning', this)">📖 Hindi Meaning</button>
+          <button class="option-btn" onclick="handleWordOption('${word.replace(/'/g, "\\'")}', 'english-translation', this)">🔄 English Translation</button>
+        </div>`;
+      appendMessage('ai', html, true);
+      // assistantMessages में न डालें, यह सिर्फ UI है
+    }
+
+    async function handleWordOption(word, option, btnElement) {
+      // बटन को डिसेबल करें
+      const buttons = btnElement.parentElement.querySelectorAll('.option-btn');
+      buttons.forEach(b => b.disabled = true);
+      btnElement.style.background = '#ccc';
+
+      let prompt = '';
+      if (option === 'hindi-meaning') {
+        prompt = `User wants to know the meaning of "${word}" in Hindi (explain in Hinglish). Please provide a short definition and example sentence in Hinglish.`;
+      } else {
+        prompt = `User wants to translate "${word}" into English. Provide the English translation and, if necessary, a brief explanation in Hinglish.`;
+      }
+
       try {
-        const reply = await callGroqAPIForAssistant([
-          { role: "system", content: "You are a helpful English learning assistant. Answer questions about Hindi word meanings, English translations, and grammar tips. Keep answers concise." },
-          ...assistantMessages
-        ]);
+        const reply = await callGroqAPIForAssistant([{ role: "user", content: prompt }], 0.7);
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
       } catch (err) {
         appendMessage('ai', '⚠️ Error: ' + err.message);
       }
-      sendBtn.disabled = false;
     }
 
     sendBtn.addEventListener('click', sendAssistantMessage);
     assistantInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendAssistantMessage(); });
+
     document.getElementById('user-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('submit-btn').click(); });
   </script>
 </body>
