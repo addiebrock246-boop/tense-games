@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Complete Translation Fix</title>
+  <title>English Tense Master – Accurate Translation</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -64,7 +64,7 @@
 <body>
   <div class="main-container">
     <div class="game-column">
-      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">अब AI कोई शब्द नहीं छोड़ेगा – पूरा अनुवाद मिलेगा</p></header>
+      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">अब AI सटीक अनुवाद देगा – न कोई कम, न कोई ज़्यादा</p></header>
       <div id="menu" class="menu-container">
         <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
@@ -136,7 +136,6 @@
       try { return JSON.parse(content); } catch { throw new Error('Invalid JSON from AI'); }
     }
 
-    // असिस्टेंट के लिए API कॉल – max_tokens 600 ताकि पूरा जवाब आए
     async function callGroqAPIForAssistant(messages, temperature = 0.7, maxTokens = 600) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -208,7 +207,7 @@
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // ==================== वैलिडेशन – अब कोई शब्द नहीं छूटेगा ====================
+    // ==================== वैलिडेशन – सटीक और स्वाभाविक अनुवाद ====================
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -219,15 +218,14 @@
         systemPrompt = `Check if the passive voice sentence is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
-        // बहुत सख्त system prompt – पूरा अनुवाद, location/time/manner शामिल करो
-        systemPrompt = `You are an English teacher. Your task is to check if the user's English translation fully matches the Hindi sentence. 
+        systemPrompt = `You are an English teacher. Your task is to check if the user's English translation accurately and naturally conveys the meaning of the Hindi sentence.  
 Important rules:
-1. If the Hindi sentence contains location (जैसे घर में, स्कूल में), time (कल, आज), or manner (धीरे-धीरे), these MUST be present in the English translation.
-2. Do NOT omit any information from the original Hindi sentence.
-3. If the user's translation is missing something, mark it as INCORRECT and provide the COMPLETE correct translation.
-4. If the user's translation is correct, mark it as CORRECT.
+1. Do NOT add words that are not explicitly present in the Hindi sentence (e.g., do not add "now" unless the Hindi has "अब").  
+2. If the user misses an article (a/an/the) before a singular countable noun, mark as INCORRECT and provide the correct translation with an appropriate article (use "a" unless the context demands "the").  
+3. If the user's translation is correct, mark as CORRECT.  
+4. Provide a brief message explaining the mistake, if any.  
 
-Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"(complete translation, no missing words)", "alternatives":[...] }`;
+Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
       }
       document.getElementById('submit-btn').disabled = true;
@@ -245,7 +243,6 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
           document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
           document.getElementById('next-btn').style.display = 'inline-block';
           document.getElementById('submit-btn').disabled = true;
-          // असिस्टेंट को गलती समझाने भेजें
           explainMistake(userAnswer, correct, currentSection === 'active-passive' ? currentQuestion.active : currentQuestion.hindi);
         }
       } catch (err) { 
