@@ -1,14 +1,7 @@
 {
   "functions": {
-    "api/**/*.js": {
-      "memory": 512,
+    "api/*.js": {
       "maxDuration": 15
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/ask-ai",
-      "destination": "/api/ask-ai.js"
-    }
-  ]
+  }
 }
