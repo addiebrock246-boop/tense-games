@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Accurate Translation</title>
+  <title>English Tense Master – Perfect Validation</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -107,9 +107,7 @@
       pointer-events: none;
       white-space: nowrap;
     }
-    .congrats-popup.show {
-      transform: translateX(-50%) scale(1);
-    }
+    .congrats-popup.show { transform: translateX(-50%) scale(1); }
 
     @media (max-width: 850px) { 
       .main-container { flex-direction: column; } 
@@ -126,10 +124,7 @@
   </style>
 </head>
 <body>
-  <div id="congratsPopup" class="congrats-popup">
-    <span id="congratsText"></span>
-  </div>
-
+  <div id="congratsPopup" class="congrats-popup"><span id="congratsText"></span></div>
   <div class="main-container">
     <div class="game-column">
       <header class="hero">
@@ -137,12 +132,8 @@
           <h1>✨ English Tense Master ✨</h1>
           <p class="tagline">अब AI सटीक अनुवाद देगा – न कोई कम, न कोई ज़्यादा</p>
         </div>
-        <div class="timer-box">
-          <span>⏱️</span>
-          <span id="timerDisplay">00:00:00</span>
-        </div>
+        <div class="timer-box"><span>⏱️</span> <span id="timerDisplay">00:00:00</span></div>
       </header>
-
       <div id="menu" class="menu-container">
         <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
@@ -150,7 +141,6 @@
         <div class="menu-card" onclick="startSection('mix')"><div class="card-icon">🎯</div><h2>Mixed (All)</h2><p>तीनों टेंस, सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('active-passive')"><div class="card-icon">🔄</div><h2>Active ↔ Passive</h2><p>Voice conversion</p></div>
       </div>
-
       <div id="game-area" style="display: none;">
         <div class="game-panel">
           <div class="question-display"><span id="question-text"></span></div>
@@ -166,7 +156,6 @@
         </div>
       </div>
     </div>
-
     <div class="assistant-column">
       <div class="assistant-card">
         <div class="assistant-header">🤖 Ask AI Assistant</div>
@@ -312,7 +301,12 @@
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // ===== ULTIMATE FIXED VALIDATION – NO MORE TIME EXPRESSION ERRORS =====
+    // Helper: clean text for comparison (remove punctuation, extra spaces, lower)
+    function cleanText(str) {
+      return str.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+
+    // ===== PERFECTED VALIDATION – NEVER MARK IDENTICAL AS INCORRECT =====
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -344,37 +338,42 @@ CRITICAL TIME EXPRESSION MAPPING (never violate these):
 GRAMMAR RULES:
 - Check articles carefully. A singular countable noun (like 'movie', 'park') needs an article (a/an/the) unless it's determined by a possessive or demonstrative. So "watch movie" is INCORRECT because 'movie' is singular countable and lacks an article; it should be "watch a movie" or "watch the movie". However, if the user writes "watch movies" (plural), that's fine.
 - Prepositions: "watch a movie tonight" / "watch a movie at night" etc. are natural; don't be pedantic.
-- DO NOT change the time expression incorrectly. If the Hindi says "कल शाम" (future), the correct translation must use "tomorrow evening" or "tomorrow night". NEVER use "tonight" for "कल". If the user writes "tomorrow night", it is CORRECT for time (only the article may be missing).
-- If the user's answer has the correct time expression and correct tense, but only a small mistake like missing article, mark INCORRECT but your "correct_translation" must keep the same time expression. Example: Hindi: "वह कल शाम को फिल्म देखेगा।" User: "he will watch movie tomorrow night" → INCORRECT (missing 'a'), correct_translation: "He will watch a movie tomorrow night." (NOT "tonight").
+- DO NOT change the time expression incorrectly. If the Hindi says "कल शाम" (future), the correct translation must use "tomorrow evening" or "tomorrow night". NEVER use "tonight" for "कल".
+- If the user's answer has the correct time expression and correct tense, but only a small mistake like missing article, mark INCORRECT but your "correct_translation" must keep the same time expression.
 - Be fair and consistent. If the only error is a missing article, mention that in the message.
 
-Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }.
-If INCORRECT, message should state the mistake briefly. If CORRECT, message can be "Well done!" or empty.`;
+IMPORTANT: Before marking INCORRECT, check if your own "correct_translation" is essentially the same as the user's answer (ignoring punctuation and capitalization). If it is, mark CORRECT instead.
+
+Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }.`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
       }
       
       document.getElementById('submit-btn').disabled = true;
       try {
         const result = await callGroqAPIForGame([{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }]);
-        if (result.status === 'CORRECT') {
-          score++; document.getElementById('score').innerText = score;
-          document.getElementById('feedback').innerHTML = '✅ Correct! ' + (result.message || '');
-          document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
-          document.getElementById('next-btn').style.display = 'inline-block'; 
-        } else {
-          const correct = result.correct_translation || result.correct_passive || '';
-          // Security: if correct is identical to userAnswer (ignoring spaces/case), force CORRECT
-          if (correct.replace(/\s+/g, ' ').trim().toLowerCase() === userAnswer.replace(/\s+/g, ' ').trim().toLowerCase()) {
-            score++; document.getElementById('score').innerText = score;
-            document.getElementById('feedback').innerHTML = '✅ Correct! (AI ने गलती से INCORRECT बता दिया था, लेकिन आपका जवाब सही है)';
-            document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
-            document.getElementById('next-btn').style.display = 'inline-block';
-          } else {
-            document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
-            document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
-            document.getElementById('next-btn').style.display = 'inline-block';
-            explainMistake(userAnswer, correct, currentSection === 'active-passive' ? currentQuestion.active : currentQuestion.hindi);
+        const aiStatus = result.status;
+        const correctAnswer = result.correct_translation || result.correct_passive || '';
+        
+        // Force CORRECT if AI's "correct" is identical to user's answer (ignoring punctuation, spaces, case)
+        const cleanedUser = cleanText(userAnswer);
+        const cleanedAI = cleanText(correctAnswer);
+        
+        if (aiStatus === 'CORRECT' || cleanedUser === cleanedAI) {
+          // Definitely correct
+          if (aiStatus !== 'CORRECT') {
+            // AI said INCORRECT but the answers match; override
+            console.log('Overriding AI: identical answer forced to CORRECT');
           }
+          score++; document.getElementById('score').innerText = score;
+          document.getElementById('feedback').innerHTML = '✅ Correct! ' + ((aiStatus === 'CORRECT') ? (result.message || '') : '(AI ने गलती की, पर आपका जवाब बिल्कुल सही है)');
+          document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
+          document.getElementById('next-btn').style.display = 'inline-block';
+        } else {
+          // Genuinely incorrect
+          document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
+          document.getElementById('alternatives').innerText = correctAnswer ? 'Correct: ' + correctAnswer : '';
+          document.getElementById('next-btn').style.display = 'inline-block';
+          explainMistake(userAnswer, correctAnswer, currentSection === 'active-passive' ? currentQuestion.active : currentQuestion.hindi);
         }
       } catch (err) { 
         document.getElementById('feedback').innerText = 'Error: ' + err.message; 
@@ -390,7 +389,7 @@ If INCORRECT, message should state the mistake briefly. If CORRECT, message can 
       assistantMessages.push({ role: "user", content: userMessageContent });
       appendMessage('user', userMessageContent);
       try {
-        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish. Point out specific grammar mistakes.`;
+        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish. Point out specific grammar mistakes. Be accurate and never say something is wrong when it's actually correct.`;
         const reply = await callGroqAPIForAssistant([{ role: "system", content: strictSystemPrompt }, ...assistantMessages], 0.7, 600);
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
@@ -438,7 +437,7 @@ If INCORRECT, message should state the mistake briefly. If CORRECT, message can 
         showWordOptions(text);
       } else {
         try {
-          const strictChatPrompt = `You are a helpful English learning assistant. Answer in Hinglish. Use English for grammar terms. Keep it friendly and detailed.`;
+          const strictChatPrompt = `You are a helpful English learning assistant. Answer in Hinglish. Use English for grammar terms. Be accurate and logical. Do not give nonsense explanations.`;
           const reply = await callGroqAPIForAssistant([{ role: "system", content: strictChatPrompt }, ...assistantMessages], 0.8, 600);
           appendMessage('ai', reply);
           assistantMessages.push({ role: "assistant", content: reply });
