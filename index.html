@@ -21,7 +21,6 @@
     .game-column { flex: 1 1 60%; }
     .assistant-column { flex: 1 1 35%; display: flex; flex-direction: column; gap: 10px; }
 
-    /* Hero + Timer */
     .hero {
       display: flex;
       justify-content: space-between;
@@ -53,7 +52,6 @@
       font-weight: 600;
     }
 
-    /* Menu */
     .menu-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
     .menu-card { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 20px 10px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
     .menu-card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.15); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.3); }
@@ -61,7 +59,6 @@
     .menu-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; color: #fff; }
     .menu-card p { font-size: 0.8rem; color: #ccccdd; }
 
-    /* Game Panel */
     .game-panel { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideUp 0.4s ease; width: 100%; }
     @keyframes slideUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
     .question-display { background: rgba(0,0,0,0.3); border-radius: 20px; padding: 20px; margin-bottom: 20px; font-size: 1.3rem; font-weight: 600; min-height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05); }
@@ -79,7 +76,6 @@
     .back-btn { background: rgba(255,255,255,0.2); border: none; padding: 10px 22px; border-radius: 50px; font-weight: 600; color: white; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
     .back-btn:hover { background: rgba(255,255,255,0.35); }
 
-    /* Assistant */
     .assistant-card { background: rgba(255,255,255,0.07); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; height: 100%; }
     .assistant-header { font-size: 1.3rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; justify-content: center; }
     .chat-area { flex: 1; overflow-y: auto; max-height: 400px; margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.25); border-radius: 15px; display: flex; flex-direction: column; gap: 10px; }
@@ -110,6 +106,7 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
       transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       pointer-events: none;
+      white-space: nowrap;
     }
     .congrats-popup.show {
       transform: translateX(-50%) scale(1);
@@ -197,7 +194,7 @@
       { role: "assistant", content: "नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और पूरी व्याख्या करूंगा।" }
     ];
 
-    // ========== टाइमर & कंग्रेचुलेशन ==========
+    // ========== टाइमर & कंग्रेचुलेशन (बिल्कुल नया जोड़) ==========
     const timerDisplay = document.getElementById('timerDisplay');
     let startTime = Date.now();
     let totalPausedTime = 0;
@@ -224,8 +221,8 @@
 
     function showCongratsPopup(hour) {
       const popup = document.getElementById('congratsPopup');
-      document.getElementById('congratsText').textContent = 
-        `🎉 Congratulations! You've studied for ${hour} hour${hour > 1 ? 's' : ''}! Keep going! 🎉`;
+      const textEl = document.getElementById('congratsText');
+      textEl.textContent = `🎉 Congratulations! You've studied for ${hour} hour${hour > 1 ? 's' : ''}! Keep going! 🎉`;
       popup.classList.add('show');
       setTimeout(() => popup.classList.remove('show'), 4000);
     }
@@ -242,6 +239,7 @@
     });
 
     setInterval(updateTimer, 1000);
+    // टाइमर यहीं खत्म
 
     // ========== API Key ==========
     function askForApiKey() {
