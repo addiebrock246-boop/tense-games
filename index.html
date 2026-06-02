@@ -90,7 +90,6 @@
     .option-btn { padding: 6px 14px; border: none; border-radius: 20px; background: #f7971e; color: #1a1a2e; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
     .option-btn:hover { background: #ffd200; }
 
-    /* Congratulations Popup */
     .congrats-popup {
       position: fixed;
       top: 20px;
@@ -127,7 +126,6 @@
   </style>
 </head>
 <body>
-  <!-- Congratulations popup -->
   <div id="congratsPopup" class="congrats-popup">
     <span id="congratsText"></span>
   </div>
@@ -184,7 +182,6 @@
   </div>
 
   <script>
-    // ========== ग्लोबल वेरिएबल ==========
     let apiKey = '';
     let currentSection = '';
     let currentQuestion = null;
@@ -194,7 +191,7 @@
       { role: "assistant", content: "नमस्ते! मुझसे किसी भी शब्द का मतलब या ग्रामर पूछें। मैं हिंग्लिश में जवाब दूंगा और पूरी व्याख्या करूंगा।" }
     ];
 
-    // ========== टाइमर & कंग्रेचुलेशन ==========
+    // Timer
     const timerDisplay = document.getElementById('timerDisplay');
     let startTime = Date.now();
     let totalPausedTime = 0;
@@ -208,39 +205,21 @@
       const hours = Math.floor(totalSec / 3600);
       const mins = Math.floor((totalSec % 3600) / 60);
       const secs = totalSec % 60;
-      timerDisplay.textContent = 
-        String(hours).padStart(2,'0') + ':' + 
-        String(mins).padStart(2,'0') + ':' + 
-        String(secs).padStart(2,'0');
-
-      if (hours > lastCongratHour) {
-        lastCongratHour = hours;
-        showCongratsPopup(hours);
-      }
+      timerDisplay.textContent = String(hours).padStart(2,'0') + ':' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      if (hours > lastCongratHour) { lastCongratHour = hours; showCongratsPopup(hours); }
     }
-
     function showCongratsPopup(hour) {
       const popup = document.getElementById('congratsPopup');
-      const textEl = document.getElementById('congratsText');
-      textEl.textContent = `🎉 Congratulations! You've studied for ${hour} hour${hour > 1 ? 's' : ''}! Keep going! 🎉`;
+      document.getElementById('congratsText').textContent = `🎉 Congratulations! You've studied for ${hour} hour${hour>1?'s':''}! Keep going! 🎉`;
       popup.classList.add('show');
       setTimeout(() => popup.classList.remove('show'), 4000);
     }
-
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        hideTime = Date.now();
-      } else {
-        if (hideTime) {
-          totalPausedTime += Date.now() - hideTime;
-          hideTime = null;
-        }
-      }
+      if (document.hidden) hideTime = Date.now();
+      else if (hideTime) { totalPausedTime += Date.now() - hideTime; hideTime = null; }
     });
-
     setInterval(updateTimer, 1000);
 
-    // ========== API Key ==========
     function askForApiKey() {
       return new Promise((resolve) => {
         const key = prompt("🔑 अपनी Groq API Key डालें:");
@@ -249,7 +228,6 @@
       });
     }
 
-    // ========== API कॉल ==========
     async function callGroqAPIForGame(messages) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -275,7 +253,6 @@
       return data.choices[0].message.content.trim();
     }
 
-    // ==================== गेम लॉजिक ====================
     async function startSection(section) {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       currentSection = section; score = 0; usedQuestions = [];
@@ -316,7 +293,7 @@
         if (tense === 'present') tenseDesc = 'any present subtype (Simple, Continuous, Perfect, Perfect Continuous)';
         else if (tense === 'past') tenseDesc = 'any past subtype (Simple, Continuous, Perfect, Perfect Continuous)';
         else if (tense === 'future') tenseDesc = 'any future subtype (Simple, Continuous, Perfect, Perfect Continuous)';
-        else tenseDesc = 'randomly choose among present/past/future subtypes (Simple, Continuous, Perfect, Perfect Continuous)';
+        else tenseDesc = 'randomly choose among present/past/future subtypes';
         systemPrompt = `Generate a new Hindi sentence for English translation. Tense/subtype: ${tenseDesc}. Not in: [${usedList}]. Return JSON: { "hindi": "..." }`;
         userPrompt = "Generate.";
       }
@@ -335,7 +312,7 @@
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // ==================== वैलिडेशन – सटीक और स्वाभाविक अनुवाद (FIXED) ====================
+    // ===== FIXED VALIDATION PROMPT =====
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -347,17 +324,20 @@
         systemPrompt = `Check if the passive voice sentence is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
-        // IMPROVED SYSTEM PROMPT – अब सही जवाब गलत नहीं बताएगा
-        systemPrompt = `You are an expert English teacher. Check if the user's English translation accurately and naturally conveys the meaning of the Hindi sentence.
+        systemPrompt = `You are an English teacher. Check if the user's English translation accurately conveys the Hindi sentence.
 
-Rules:
-1. Do NOT add or expect words that are not explicitly present in the Hindi sentence (e.g., do not add "now" unless the Hindi has "अब").
-2. Articles (a/an/the): Mark INCORRECT only if a singular countable noun lacks an article AND there is no other determiner (like my, his, their, this, that, etc.) before it. For example, "their family" is already correct without an article.
-3. Time expressions: Translate naturally. "कल" in past context means "yesterday", not "the day before yesterday". "परसों" means "the day before yesterday" or "the day after tomorrow" depending on context.
-4. Be lenient with minor variations (e.g., "travelling" vs "traveling", "had been" vs "had been") as long as the core tense and meaning are correct.
-5. Provide a clear, brief message explaining the mistake, if any. If the answer is correct, simply say "Correct!" and show any alternative translations.
-
-Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
+CRITICAL RULES:
+1. Time expressions – MUST FOLLOW:
+   - "कल" in past = "yesterday" (NOT "the day before yesterday").
+   - "कल" in future = "tomorrow".
+   - "परसों" (past) = "the day before yesterday".
+   - "परसों" (future) = "the day after tomorrow".
+   - "सुबह" = "morning" (not necessarily "in the morning"; "yesterday morning" is fine).
+2. Articles (a/an/the): Only mark INCORRECT if a singular countable noun lacks an article AND there is no other determiner (like my, his, their, this, that). "their family", "my friend" etc. are correct without an article.
+3. For generic contexts, use "a" (e.g., "a picnic") unless the Hindi implies a specific one ("उस पिकनिक").
+4. Tense: Match the Hindi tense. "गया था" is Past Simple or Past Perfect; "जा रहा था" is Past Continuous; "जा चुका था" is Past Perfect; "जाता था" is used to/would go. Do NOT accept present continuous for past actions.
+5. Be natural; ignore minor spelling variants (travelling/traveling).
+6. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
       }
       
@@ -369,13 +349,11 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
           document.getElementById('feedback').innerHTML = '✅ Correct! ' + (result.message || '');
           document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
           document.getElementById('next-btn').style.display = 'inline-block'; 
-          document.getElementById('submit-btn').disabled = true;
         } else {
           const correct = result.correct_translation || result.correct_passive || '';
           document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
           document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
           document.getElementById('next-btn').style.display = 'inline-block';
-          document.getElementById('submit-btn').disabled = true;
           explainMistake(userAnswer, correct, currentSection === 'active-passive' ? currentQuestion.active : currentQuestion.hindi);
         }
       } catch (err) { 
@@ -384,27 +362,19 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
       }
     });
 
-    // ==================== असिस्टेंट को गलती समझाने का फंक्शन ====================
     async function explainMistake(wrongAnswer, correctAnswer, questionText) {
       const isPassive = currentSection === 'active-passive';
       const userMessageContent = isPassive
         ? `Active sentence: "${questionText}"\nI wrote passive: "${wrongAnswer}" but correct is: "${correctAnswer}". Explain my mistake in Hinglish.`
         : `Hindi: "${questionText}"\nI wrote: "${wrongAnswer}" but correct translation is: "${correctAnswer}". Mujhe meri galti Hinglish mein samjhao.`;
-      
       assistantMessages.push({ role: "user", content: userMessageContent });
       appendMessage('user', userMessageContent);
-      
       try {
-        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish (a natural mix of Hindi and English, NOT pure Hindi). Example: "Aapne yahan 'the' use kiya jo galat hai, kyunki..." Always point out specific grammar mistakes: missing articles, wrong prepositions, unnatural collocations, tense errors, etc. Provide a complete, detailed explanation. Never say a wrong sentence is correct.`;
-        const reply = await callGroqAPIForAssistant([
-          { role: "system", content: strictSystemPrompt },
-          ...assistantMessages
-        ], 0.7, 600);
+        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish. Point out specific grammar mistakes.`;
+        const reply = await callGroqAPIForAssistant([{ role: "system", content: strictSystemPrompt }, ...assistantMessages], 0.7, 600);
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
-      } catch (err) {
-        appendMessage('ai', '⚠️ Error explaining mistake: ' + err.message);
-      }
+      } catch (err) { appendMessage('ai', '⚠️ Error: ' + err.message); }
     }
 
     async function loadNextQuestion() {
@@ -415,7 +385,6 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
       document.getElementById('submit-btn').disabled = false;
     }
 
-    // ==================== AI असिस्टेंट (मैन्युअल) ====================
     const chatArea = document.getElementById('chat-area');
     const assistantInput = document.getElementById('assistant-input');
     const sendBtn = document.getElementById('send-assistant-btn');
@@ -423,8 +392,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
     function appendMessage(role, content, isHtml = false) {
       const msgDiv = document.createElement('div');
       msgDiv.className = `chat-message ${role}`;
-      if (isHtml) msgDiv.innerHTML = content;
-      else msgDiv.textContent = content;
+      if (isHtml) msgDiv.innerHTML = content; else msgDiv.textContent = content;
       chatArea.appendChild(msgDiv);
       chatArea.scrollTop = chatArea.scrollHeight;
     }
@@ -432,8 +400,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
     function isWordQuery(text) {
       const trimmed = text.trim();
       if (/[?.!]$/.test(trimmed)) return false;
-      const words = trimmed.split(/\s+/);
-      if (words.length > 4) return false;
+      if (trimmed.split(/\s+/).length > 4) return false;
       const questionWords = ['क्या','क्यों','कैसे','किसने','किसको','कब','कहाँ','कितना'];
       if (questionWords.some(w => trimmed.toLowerCase().includes(w))) return false;
       return true;
@@ -443,26 +410,19 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
       const text = assistantInput.value.trim();
       if (!text) return;
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
-
       appendMessage('user', text);
       assistantMessages.push({ role: "user", content: text });
       assistantInput.value = '';
       sendBtn.disabled = true;
-
       if (isWordQuery(text)) {
         showWordOptions(text);
       } else {
         try {
-          const strictChatPrompt = `You are a helpful English learning assistant. Always answer in Hinglish (mix of Hindi and English, like "Aapne 'the' use kiya jo galat hai..."). Use English for grammar terms and example sentences. Never write in pure Hindi. Keep it friendly and detailed.`;
-          const reply = await callGroqAPIForAssistant([
-            { role: "system", content: strictChatPrompt },
-            ...assistantMessages
-          ], 0.8, 600);
+          const strictChatPrompt = `You are a helpful English learning assistant. Answer in Hinglish. Use English for grammar terms. Keep it friendly and detailed.`;
+          const reply = await callGroqAPIForAssistant([{ role: "system", content: strictChatPrompt }, ...assistantMessages], 0.8, 600);
           appendMessage('ai', reply);
           assistantMessages.push({ role: "assistant", content: reply });
-        } catch (err) {
-          appendMessage('ai', '⚠️ Error: ' + err.message);
-        }
+        } catch (err) { appendMessage('ai', '⚠️ Error: ' + err.message); }
       }
       sendBtn.disabled = false;
     }
@@ -480,23 +440,12 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
       const buttons = btnElement.parentElement.querySelectorAll('.option-btn');
       buttons.forEach(b => b.disabled = true);
       btnElement.style.background = '#ccc';
-
-      let prompt = '';
-      if (option === 'hindi-meaning') {
-        prompt = `User wants the Hindi meaning of "${word}". Explain in Hinglish with example.`;
-      } else {
-        prompt = `User wants the English translation of "${word}". Provide it and a brief explanation in Hinglish.`;
-      }
+      let prompt = option === 'hindi-meaning' ? `User wants Hindi meaning of "${word}". Explain in Hinglish.` : `User wants English translation of "${word}". Explain in Hinglish.`;
       try {
-        const reply = await callGroqAPIForAssistant([
-          { role: "system", content: "You are a helpful English-Hindi dictionary. Answer in Hinglish. Be accurate." },
-          { role: "user", content: prompt }
-        ], 0.7, 300);
+        const reply = await callGroqAPIForAssistant([{ role: "system", content: "You are a helpful English-Hindi dictionary. Answer in Hinglish. Be accurate." }, { role: "user", content: prompt }], 0.7, 300);
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
-      } catch (err) {
-        appendMessage('ai', '⚠️ Error: ' + err.message);
-      }
+      } catch (err) { appendMessage('ai', '⚠️ Error: ' + err.message); }
     }
 
     sendBtn.addEventListener('click', sendAssistantMessage);
