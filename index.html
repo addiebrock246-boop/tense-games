@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Accurate Translation</title>
+  <title>English Tense Master – Accurate Translation (No More Bakchodi)</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -312,7 +312,7 @@
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // ===== FIXED VALIDATION PROMPT =====
+    // ===== ULTIMATE FIXED VALIDATION – NO MORE BAKCHODI =====
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -324,20 +324,19 @@
         systemPrompt = `Check if the passive voice sentence is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
-        systemPrompt = `You are an English teacher. Check if the user's English translation accurately conveys the Hindi sentence.
+        systemPrompt = `You are an English teacher. Evaluate the user's English translation of the Hindi sentence.
 
-CRITICAL RULES:
-1. Time expressions – MUST FOLLOW:
-   - "कल" in past = "yesterday" (NOT "the day before yesterday").
-   - "कल" in future = "tomorrow".
-   - "परसों" (past) = "the day before yesterday".
-   - "परसों" (future) = "the day after tomorrow".
-   - "सुबह" = "morning" (not necessarily "in the morning"; "yesterday morning" is fine).
-2. Articles (a/an/the): Only mark INCORRECT if a singular countable noun lacks an article AND there is no other determiner (like my, his, their, this, that). "their family", "my friend" etc. are correct without an article.
-3. For generic contexts, use "a" (e.g., "a picnic") unless the Hindi implies a specific one ("उस पिकनिक").
-4. Tense: Match the Hindi tense. "गया था" is Past Simple or Past Perfect; "जा रहा था" is Past Continuous; "जा चुका था" is Past Perfect; "जाता था" is used to/would go. Do NOT accept present continuous for past actions.
-5. Be natural; ignore minor spelling variants (travelling/traveling).
-6. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
+ESSENTIAL RULES:
+1. ACCEPT any translation that correctly conveys the meaning and has natural grammar.
+2. DO NOT mark something as INCORRECT unless there is a clear grammatical mistake or a missing element that changes the meaning.
+3. PREPOSITIONS: "play in a park", "play at a park" are BOTH correct. Do not penalize.
+4. ARTICLES: Only require an article if the singular countable noun has no other determiner. "in a new park" is correct.
+5. TENSE: Must match the Hindi tense. But accept minor variations like "he will play" / "he will be playing" if the context permits.
+6. COMPARISON: If you suggest a "correct_translation" and it is essentially the same as the user's answer (ignoring case and minor word order), you MUST mark the user as CORRECT. Never call the same sentence incorrect.
+7. Be helpful, not pedantic.
+
+Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }.
+If INCORRECT, the correct_translation must be DIFFERENT from the user's answer. If CORRECT, message can be empty or a short praise.`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
       }
       
@@ -351,10 +350,18 @@ CRITICAL RULES:
           document.getElementById('next-btn').style.display = 'inline-block'; 
         } else {
           const correct = result.correct_translation || result.correct_passive || '';
-          document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
-          document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
-          document.getElementById('next-btn').style.display = 'inline-block';
-          explainMistake(userAnswer, correct, currentSection === 'active-passive' ? currentQuestion.active : currentQuestion.hindi);
+          // Double-check: if correct is identical to userAnswer, force CORRECT
+          if (correct.replace(/\s+/g, ' ').trim().toLowerCase() === userAnswer.replace(/\s+/g, ' ').trim().toLowerCase()) {
+            score++; document.getElementById('score').innerText = score;
+            document.getElementById('feedback').innerHTML = '✅ Correct! (AI ने गलती से INCORRECT बता दिया था, लेकिन आपका जवाब सही है)';
+            document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
+            document.getElementById('next-btn').style.display = 'inline-block';
+          } else {
+            document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
+            document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
+            document.getElementById('next-btn').style.display = 'inline-block';
+            explainMistake(userAnswer, correct, currentSection === 'active-passive' ? currentQuestion.active : currentQuestion.hindi);
+          }
         }
       } catch (err) { 
         document.getElementById('feedback').innerText = 'Error: ' + err.message; 
