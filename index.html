@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Perfect Validation</title>
+  <title>English Tense Master – All Sentence Types</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -130,7 +130,7 @@
       <header class="hero">
         <div class="hero-left">
           <h1>✨ English Tense Master ✨</h1>
-          <p class="tagline">अब AI सटीक अनुवाद देगा – न कोई कम, न कोई ज़्यादा</p>
+          <p class="tagline">सभी प्रकार: Affirmative, Negative, Interrogative, Double Interrogative</p>
         </div>
         <div class="timer-box"><span>⏱️</span> <span id="timerDisplay">00:00:00</span></div>
       </header>
@@ -271,42 +271,61 @@
       document.getElementById('feedback').innerText = '⚠️ नए सवाल की जनरेशन विफल।';
     }
 
+    // UPDATED: now includes sentence type randomization
     async function tryGenerateQuestion(tense) {
       const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
       let systemPrompt, userPrompt;
+      
       if (currentSection === 'active-passive') {
-        systemPrompt = `Generate a new active voice English sentence not in: [${usedList}]. Return JSON: { "active": "..." }`;
-        userPrompt = "Generate.";
+        // For active-passive, keep it simple – mostly affirmative, but can include negatives occasionally
+        const types = ['affirmative', 'negative'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        systemPrompt = `Generate a new ${type} active voice English sentence not in: [${usedList}]. Return JSON: { "active": "..." }`;
+        userPrompt = `Generate a ${type} active voice sentence.`;
       } else {
+        // Randomly pick a sentence type: affirmative, negative, interrogative, double interrogative
+        const types = ['affirmative', 'negative', 'interrogative', 'double interrogative'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        
         let tenseDesc = '';
         if (tense === 'present') tenseDesc = 'any present subtype (Simple, Continuous, Perfect, Perfect Continuous)';
         else if (tense === 'past') tenseDesc = 'any past subtype (Simple, Continuous, Perfect, Perfect Continuous)';
         else if (tense === 'future') tenseDesc = 'any future subtype (Simple, Continuous, Perfect, Perfect Continuous)';
         else tenseDesc = 'randomly choose among present/past/future subtypes';
-        systemPrompt = `Generate a new Hindi sentence for English translation. Tense/subtype: ${tenseDesc}. Not in: [${usedList}]. Return JSON: { "hindi": "..." }`;
-        userPrompt = "Generate.";
+        
+        systemPrompt = `Generate a new Hindi sentence for English translation. Tense/subtype: ${tenseDesc}. Sentence type: ${type}. Not in: [${usedList}]. Return JSON: { "hindi": "...", "type": "${type}" }.
+        Definitions:
+        - affirmative: normal positive sentence (e.g., "वह स्कूल जाता है।")
+        - negative: negative sentence (e.g., "वह स्कूल नहीं जाता।")
+        - interrogative: question (e.g., "क्या वह स्कूल जाता है?")
+        - double interrogative: negative question (e.g., "क्या वह स्कूल नहीं जाता?")`;
+        userPrompt = `Generate a ${type} Hindi sentence.`;
       }
+      
       const result = await callGroqAPIForGame([{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }]);
-      if (result.hindi) return { hindi: result.hindi };
+      if (result.hindi) return { hindi: result.hindi, type: result.type };
       if (result.active) return { active: result.active };
       throw new Error('No question generated');
     }
 
     function displayQuestion() {
       const qText = document.getElementById('question-text');
-      if (currentSection === 'active-passive') qText.innerHTML = `Change to Passive Voice:<br><b>${currentQuestion.active}</b>`;
-      else qText.innerHTML = `Translate to English:<br><b>${currentQuestion.hindi}</b>`;
+      if (currentSection === 'active-passive') {
+        qText.innerHTML = `Change to Passive Voice:<br><b>${currentQuestion.active}</b>`;
+      } else {
+        qText.innerHTML = `Translate to English:<br><b>${currentQuestion.hindi}</b>`;
+      }
       document.getElementById('user-input').value = ''; document.getElementById('feedback').innerText = ''; 
       document.getElementById('alternatives').innerText = ''; 
       document.getElementById('next-btn').style.display = 'none';
     }
 
-    // Helper: clean text for comparison (remove punctuation, extra spaces, lower)
+    // Helper: clean text for comparison
     function cleanText(str) {
       return str.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
     }
 
-    // ===== PERFECTED VALIDATION – NEVER MARK IDENTICAL AS INCORRECT =====
+    // ===== PERFECTED VALIDATION =====
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -338,9 +357,8 @@ CRITICAL TIME EXPRESSION MAPPING (never violate these):
 GRAMMAR RULES:
 - Check articles carefully. A singular countable noun (like 'movie', 'park') needs an article (a/an/the) unless it's determined by a possessive or demonstrative. So "watch movie" is INCORRECT because 'movie' is singular countable and lacks an article; it should be "watch a movie" or "watch the movie". However, if the user writes "watch movies" (plural), that's fine.
 - Prepositions: "watch a movie tonight" / "watch a movie at night" etc. are natural; don't be pedantic.
-- DO NOT change the time expression incorrectly. If the Hindi says "कल शाम" (future), the correct translation must use "tomorrow evening" or "tomorrow night". NEVER use "tonight" for "कल".
+- DO NOT change the time expression incorrectly.
 - If the user's answer has the correct time expression and correct tense, but only a small mistake like missing article, mark INCORRECT but your "correct_translation" must keep the same time expression.
-- Be fair and consistent. If the only error is a missing article, mention that in the message.
 
 IMPORTANT: Before marking INCORRECT, check if your own "correct_translation" is essentially the same as the user's answer (ignoring punctuation and capitalization). If it is, mark CORRECT instead.
 
@@ -354,14 +372,11 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
         const aiStatus = result.status;
         const correctAnswer = result.correct_translation || result.correct_passive || '';
         
-        // Force CORRECT if AI's "correct" is identical to user's answer (ignoring punctuation, spaces, case)
         const cleanedUser = cleanText(userAnswer);
         const cleanedAI = cleanText(correctAnswer);
         
         if (aiStatus === 'CORRECT' || cleanedUser === cleanedAI) {
-          // Definitely correct
           if (aiStatus !== 'CORRECT') {
-            // AI said INCORRECT but the answers match; override
             console.log('Overriding AI: identical answer forced to CORRECT');
           }
           score++; document.getElementById('score').innerText = score;
@@ -369,7 +384,6 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
           document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
           document.getElementById('next-btn').style.display = 'inline-block';
         } else {
-          // Genuinely incorrect
           document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
           document.getElementById('alternatives').innerText = correctAnswer ? 'Correct: ' + correctAnswer : '';
           document.getElementById('next-btn').style.display = 'inline-block';
@@ -389,7 +403,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
       assistantMessages.push({ role: "user", content: userMessageContent });
       appendMessage('user', userMessageContent);
       try {
-        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish. Point out specific grammar mistakes. Be accurate and never say something is wrong when it's actually correct.`;
+        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish. Point out specific grammar mistakes. Be accurate and logical.`;
         const reply = await callGroqAPIForAssistant([{ role: "system", content: strictSystemPrompt }, ...assistantMessages], 0.7, 600);
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
@@ -437,7 +451,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
         showWordOptions(text);
       } else {
         try {
-          const strictChatPrompt = `You are a helpful English learning assistant. Answer in Hinglish. Use English for grammar terms. Be accurate and logical. Do not give nonsense explanations.`;
+          const strictChatPrompt = `You are a helpful English learning assistant. Answer in Hinglish. Use English for grammar terms. Be accurate and logical.`;
           const reply = await callGroqAPIForAssistant([{ role: "system", content: strictChatPrompt }, ...assistantMessages], 0.8, 600);
           appendMessage('ai', reply);
           assistantMessages.push({ role: "assistant", content: reply });
