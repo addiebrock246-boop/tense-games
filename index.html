@@ -338,10 +338,10 @@
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
         const tense = currentSection === 'mix' ? 'all' : currentSection;
-        // IMPROVED PROMPT – tense को सख्ती से मानें
-        systemPrompt = `You are an English teacher. The Hindi sentence is in a specific tense. First, determine the correct English tense for this Hindi sentence. Then check if the user's English translation matches it in meaning and tense. If incorrect, provide the correct English translation that preserves the original tense of the Hindi sentence. Do NOT change the tense.
+        // नया सख़्त प्रॉम्प्ट – हिंदी क्रिया के आधार पर टेंस पहचानो
+        systemPrompt = `You are an English teacher. Analyze the Hindi sentence carefully. Identify its tense by looking at the verb form: if the verb ends with 'रहा है/रही है/रहे हैं' it's continuous; otherwise it's simple (habitual or general fact). Do NOT confuse simple present with present continuous. Then check the user's English translation. If incorrect, give the correct translation in the SAME tense as the Hindi original. Example: "वह हर दिन नए दोस्त बनाता है" is simple present → "He makes new friends every day". 
 Hindi: "${currentQuestion.hindi}"
-Tense context: ${tense} (use this to guide you)
+Tense hint: ${tense}
 Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `User English: "${userAnswer}"`;
       }
