@@ -134,7 +134,7 @@
 </head>
 <body>
   <div class="main-container">
-    <!-- लेफ्ट साइड: गेम -->
+    <!-- गेम कॉलम -->
     <div class="game-column">
       <header class="hero">
         <h1>✨ English Tense Master ✨</h1>
@@ -178,7 +178,6 @@
           </div>
           <div id="feedback" class="feedback-message"></div>
           <div id="alternatives" class="alt-message"></div>
-          <!-- Next बटन (शुरू में छुपा हुआ) -->
           <button id="next-btn" class="next-btn" style="display: none;" onclick="loadNextQuestion()">Next →</button>
           <div class="score-display">
             <span>⭐ Score: <strong id="score">0</strong></span>
@@ -188,7 +187,7 @@
       </div>
     </div>
 
-    <!-- राइट साइड: AI असिस्टेंट -->
+    <!-- AI असिस्टेंट कॉलम -->
     <div class="assistant-column">
       <div class="assistant-card">
         <div class="assistant-header">🤖 Ask AI Assistant</div>
@@ -207,8 +206,10 @@
     let apiKey = '';
     let currentSection = '';
     let currentQuestion = null;
-    let usedQuestions = [];
+    let usedQuestions = [];   // पूछे गए सवालों की लिस्ट
     let score = 0;
+
+    // AI असिस्टेंट चैट हिस्ट्री
     let assistantMessages = [
       { role: "assistant", content: "नमस्ते! मुझसे कोई भी हिंदी शब्द का मतलब, अंग्रेज़ी अनुवाद या ग्रामर पूछें।" }
     ];
@@ -226,7 +227,8 @@
       });
     }
 
-    async function callGroqAPI(messages, temperature = 0.3, maxTokens = 300) {
+    // गेम के लिए Groq API कॉल (JSON mode में)
+    async function callGroqAPIForGame(messages) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -236,8 +238,8 @@
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
           messages: messages,
-          temperature: temperature,
-          max_tokens: maxTokens,
+          temperature: 0.3,
+          max_tokens: 300,
           response_format: { type: "json_object" }
         })
       });
@@ -252,10 +254,31 @@
       try {
         return JSON.parse(content);
       } catch {
-        return content;
+        throw new Error('Invalid JSON from AI');
       }
     }
 
+    // असिस्टेंट के लिए API कॉल (बिना JSON mode)
+    async function callGroqAPIForAssistant(messages) {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 250
+        })
+      });
+      if (!response.ok) throw new Error('API error');
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    }
+
+    // ==================== गेम फंक्शन ====================
     async function startSection(section) {
       if (!apiKey) {
         const gotKey = await askForApiKey();
@@ -267,7 +290,7 @@
       document.getElementById('score').innerText = score;
       document.getElementById('menu').style.display = 'none';
       document.getElementById('game-area').style.display = 'block';
-      document.getElementById('next-btn').style.display = 'none'; // छुपाएँ
+      document.getElementById('next-btn').style.display = 'none';
       document.getElementById('submit-btn').disabled = true;
       document.getElementById('feedback').innerText = 'AI नया सवाल बना रहा है...';
       await generateAndDisplayQuestion();
@@ -280,35 +303,63 @@
       currentQuestion = null;
     }
 
+    // यह फंक्शन सुनिश्चित करता है कि हर बार नया सवाल आए
     async function generateAndDisplayQuestion() {
       const tense = currentSection === 'mix' ? 'all' : currentSection;
+      let attempts = 0;
+      const maxAttempts = 3;
+      let questionObj = null;
+
+      while (attempts < maxAttempts) {
+        try {
+          questionObj = await tryGenerateQuestion(tense);
+          // चेक करें कि यह सवाल पहले से usedQuestions में तो नहीं है
+          const candidate = currentSection === 'active-passive' ? questionObj.active : questionObj.hindi;
+          if (!candidate) continue;
+          if (!usedQuestions.includes(candidate)) {
+            // नया सवाल मिल गया
+            usedQuestions.push(candidate);
+            currentQuestion = questionObj;
+            displayQuestion();
+            return;
+          } else {
+            attempts++;
+          }
+        } catch (err) {
+          attempts++;
+          if (attempts >= maxAttempts) {
+            document.getElementById('feedback').innerText = '❌ AI नया सवाल नहीं बना पाया। कृपया दोबारा सेक्शन शुरू करें।';
+          }
+        }
+      }
+
+      // अगर 3 बार में भी नया नहीं बना तो पुराना सवाल ही दिखा दें? नहीं, बेहतर है मैसेज दिखाएँ।
+      document.getElementById('feedback').innerText = '⚠️ नए सवाल की जनरेशन विफल। कृपया सेक्शन दोबारा शुरू करें।';
+    }
+
+    async function tryGenerateQuestion(tense) {
       let systemPrompt, userPrompt;
+      const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
+
       if (currentSection === 'active-passive') {
-        const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
-        systemPrompt = `Generate a new active voice English sentence (simple to moderate) not in: [${usedList}]. Return JSON: { "active": "..." }`;
+        systemPrompt = `Generate a new active voice English sentence (simple to moderate) for passive voice practice. The sentence must NOT be any of the following already used sentences: [${usedList}]. Return JSON: { "active": "..." }`;
         userPrompt = "Generate.";
       } else {
-        const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
-        systemPrompt = `Generate a Hindi sentence for ${tense} tense, not in: [${usedList}]. Return JSON: { "hindi": "..." }`;
+        systemPrompt = `Generate a new Hindi sentence for ${tense} tense English translation practice. The sentence must NOT be any of the following already used sentences: [${usedList}]. Return JSON: { "hindi": "..." }`;
         userPrompt = "Generate.";
       }
-      try {
-        const result = await callGroqAPI([
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ]);
-        if (result.hindi) {
-          currentQuestion = { hindi: result.hindi };
-          usedQuestions.push(result.hindi);
-        } else if (result.active) {
-          currentQuestion = { active: result.active };
-          usedQuestions.push(result.active);
-        } else {
-          throw new Error('No question generated');
-        }
-        displayQuestion();
-      } catch (err) {
-        document.getElementById('feedback').innerText = '❌ AI सवाल नहीं बना पाया। कृपया दोबारा कोशिश करें।';
+
+      const result = await callGroqAPIForGame([
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]);
+
+      if (result.hindi) {
+        return { hindi: result.hindi };
+      } else if (result.active) {
+        return { active: result.active };
+      } else {
+        throw new Error('No question generated');
       }
     }
 
@@ -322,10 +373,10 @@
       document.getElementById('user-input').value = '';
       document.getElementById('feedback').innerText = '';
       document.getElementById('alternatives').innerText = '';
-      document.getElementById('next-btn').style.display = 'none'; // अगला बटन छुपा
+      document.getElementById('next-btn').style.display = 'none';
     }
 
-    // "Check" बटन पर क्लिक
+    // "Check" बटन दबाने पर
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) {
         const gotKey = await askForApiKey();
@@ -340,17 +391,17 @@
 
       let systemPrompt, userPrompt;
       if (currentSection === 'active-passive') {
-        systemPrompt = `Check passive voice. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
+        systemPrompt = `Check if the passive voice is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
         const tense = currentSection === 'mix' ? 'all' : currentSection;
-        systemPrompt = `Check English translation. Hindi: "${currentQuestion.hindi}". Tense: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
+        systemPrompt = `Check if the English translation is correct. Hindi: "${currentQuestion.hindi}". Tense: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
         userPrompt = `User English: "${userAnswer}"`;
       }
 
       document.getElementById('submit-btn').disabled = true;
       try {
-        const result = await callGroqAPI([
+        const result = await callGroqAPIForGame([
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ]);
@@ -363,10 +414,8 @@
           } else {
             document.getElementById('alternatives').innerText = '';
           }
-          // ऑटो-नेक्स्ट हटाकर "Next" बटन दिखाएँ
           document.getElementById('next-btn').style.display = 'inline-block';
-          document.getElementById('submit-btn').disabled = true;   // चेक बटन डिसेबल
-          // ध्यान दें: submit-btn disabled रहेगा, next-btn पर क्लिक करेंगे
+          document.getElementById('submit-btn').disabled = true; // check बटन बंद, next से आगे बढ़ें
         } else {
           document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
           const correct = result.correct_translation || result.correct_passive || '';
@@ -379,16 +428,16 @@
       }
     });
 
-    // "Next" बटन का काम – अगला सवाल लोड करेगा
+    // "Next" बटन – अगला सवाल लोड करेगा
     async function loadNextQuestion() {
-      document.getElementById('next-btn').style.display = 'none';  // छुपाएँ
-      document.getElementById('feedback').innerText = 'AI अगला सवाल बना रहा है...';
+      document.getElementById('next-btn').style.display = 'none';
+      document.getElementById('feedback').innerText = 'AI अगला नया सवाल बना रहा है...';
       document.getElementById('submit-btn').disabled = true;
       await generateAndDisplayQuestion();
       document.getElementById('submit-btn').disabled = false;
     }
 
-    // ========== AI असिस्टेंट ==========
+    // ==================== AI असिस्टेंट ====================
     const chatArea = document.getElementById('chat-area');
     const assistantInput = document.getElementById('assistant-input');
     const sendBtn = document.getElementById('send-assistant-btn');
@@ -413,25 +462,10 @@
       assistantInput.value = '';
       sendBtn.disabled = true;
       try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: 'llama-3.1-8b-instant',
-            messages: [
-              { role: "system", content: "You are a helpful English learning assistant. Answer the user's questions about Hindi words meanings, English translations, grammar tips, etc. Keep answers short and helpful." },
-              ...assistantMessages
-            ],
-            temperature: 0.7,
-            max_tokens: 250
-          })
-        });
-        if (!response.ok) throw new Error('API error');
-        const data = await response.json();
-        const reply = data.choices[0].message.content.trim();
+        const reply = await callGroqAPIForAssistant([
+          { role: "system", content: "You are a helpful English learning assistant. Answer the user's questions about Hindi words meanings, English translations, grammar tips, etc. Keep answers short and helpful." },
+          ...assistantMessages
+        ]);
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
       } catch (err) {
