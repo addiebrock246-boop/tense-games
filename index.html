@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – All Subtypes + Assistant</title>
+  <title>English Tense Master – with Mistake Explanation</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,7 +40,8 @@
     .next-btn { padding: 12px 25px; background: #3182ce; border: none; border-radius: 50px; font-weight: 700; color: white; cursor: pointer; transition: 0.3s; font-size: 1rem; margin-left: 10px; }
     .next-btn:hover { background: #2b6cb0; }
     .feedback-message { font-size: 1.1rem; font-weight: 700; margin: 10px 0; min-height: 30px; }
-    .alt-message { color: #ffd966; margin-bottom: 15px; font-size: 0.9rem; }
+    .alt-message { color: #ffd966; margin-bottom: 5px; font-size: 0.9rem; }
+    .mistake-message { color: #ff8c8c; margin-bottom: 10px; font-size: 0.9rem; font-weight: 600; }
     .score-display { background: rgba(255,255,255,0.15); display: inline-block; padding: 8px 25px; border-radius: 40px; font-weight: 600; margin-bottom: 15px; font-size: 1rem; }
     .back-btn { background: rgba(255,255,255,0.2); border: none; padding: 10px 22px; border-radius: 50px; font-weight: 600; color: white; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
     .back-btn:hover { background: rgba(255,255,255,0.35); }
@@ -54,7 +55,6 @@
     #assistant-input { flex: 1; }
     .send-btn { padding: 12px 20px; background: #3182ce; border: none; border-radius: 50px; color: white; font-weight: 700; cursor: pointer; transition: 0.3s; }
     .send-btn:hover { background: #2b6cb0; }
-    /* बटन वाले मैसेज के लिए */
     .chat-message.ai .option-buttons { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
     .option-btn { padding: 6px 14px; border: none; border-radius: 20px; background: #f7971e; color: #1a1a2e; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
     .option-btn:hover { background: #ffd200; }
@@ -65,7 +65,7 @@
 <body>
   <div class="main-container">
     <div class="game-column">
-      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">सभी उप-प्रकारों के सवाल – AI बनाएगा</p></header>
+      <header class="hero"><h1>✨ English Tense Master ✨</h1><p class="tagline">गलती की पूरी व्याख्या के साथ – सभी टेंस और उप-प्रकार</p></header>
       <div id="menu" class="menu-container">
         <div class="menu-card" onclick="startSection('present')"><div class="card-icon">📘</div><h2>Present Tense</h2><p>सभी प्रकार</p></div>
         <div class="menu-card" onclick="startSection('past')"><div class="card-icon">📙</div><h2>Past Tense</h2><p>सभी प्रकार</p></div>
@@ -81,6 +81,7 @@
             <button id="submit-btn" class="submit-btn">✓ Check</button>
           </div>
           <div id="feedback" class="feedback-message"></div>
+          <div id="mistake" class="mistake-message"></div>
           <div id="alternatives" class="alt-message"></div>
           <button id="next-btn" class="next-btn" style="display: none;" onclick="loadNextQuestion()">Next →</button>
           <div class="score-display"><span>⭐ Score: <strong id="score">0</strong></span></div>
@@ -148,7 +149,7 @@
       return data.choices[0].message.content.trim();
     }
 
-    // ==================== गेम लॉजिक (वही) ====================
+    // ==================== गेम लॉजिक (सभी टेंस, डुप्लीकेट नहीं) ====================
     async function startSection(section) {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       currentSection = section; score = 0; usedQuestions = [];
@@ -203,7 +204,9 @@
       const qText = document.getElementById('question-text');
       if (currentSection === 'active-passive') qText.innerHTML = `Change to Passive Voice:<br><b>${currentQuestion.active}</b>`;
       else qText.innerHTML = `Translate to English:<br><b>${currentQuestion.hindi}</b>`;
-      document.getElementById('user-input').value = ''; document.getElementById('feedback').innerText = ''; document.getElementById('alternatives').innerText = ''; document.getElementById('next-btn').style.display = 'none';
+      document.getElementById('user-input').value = ''; document.getElementById('feedback').innerText = ''; 
+      document.getElementById('mistake').innerText = ''; document.getElementById('alternatives').innerText = ''; 
+      document.getElementById('next-btn').style.display = 'none';
     }
 
     document.getElementById('submit-btn').addEventListener('click', async () => {
@@ -213,12 +216,12 @@
       if (!currentQuestion) { document.getElementById('feedback').innerText = 'कोई सवाल मौजूद नहीं।'; return; }
       let systemPrompt, userPrompt;
       if (currentSection === 'active-passive') {
-        systemPrompt = `Check passive voice. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
-        userPrompt = `User Passive: "${userAnswer}"`;
+        systemPrompt = `Check if the passive voice sentence correctly matches the active voice sentence. If incorrect, provide a "mistake" explanation describing what's wrong (e.g., wrong verb form, missing by-phrase, tense error) and why it's a mistake, then give the correct passive. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "mistake":"...", "correct_passive":"...", "alternatives":[...] }`;
+        userPrompt = `Active: "${currentQuestion.active}"\nUser Passive: "${userAnswer}"`;
       } else {
         const tense = currentSection === 'mix' ? 'all' : currentSection;
-        systemPrompt = `You are an English teacher. Analyze the Hindi sentence's tense by verb form. Then check the user's English translation. If incorrect, give the correct translation in the SAME tense. Hindi: "${currentQuestion.hindi}". Tense hint: ${tense}. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }`;
-        userPrompt = `User English: "${userAnswer}"`;
+        systemPrompt = `You are an English teacher. Analyze the Hindi sentence, determine its correct tense, then check the user's English translation. If incorrect, identify the specific mistake(s) – such as wrong tense, subject-verb agreement, preposition, article, word choice – and explain why it's wrong. Then provide the correct translation. Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "mistake":"...", "correct_translation":"...", "alternatives":[...] }`;
+        userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
       }
       document.getElementById('submit-btn').disabled = true;
       try {
@@ -226,11 +229,14 @@
         if (result.status === 'CORRECT') {
           score++; document.getElementById('score').innerText = score;
           document.getElementById('feedback').innerHTML = '✅ Correct! ' + (result.message || '');
+          document.getElementById('mistake').innerText = '';
           document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
           document.getElementById('next-btn').style.display = 'inline-block'; document.getElementById('submit-btn').disabled = true;
         } else {
           document.getElementById('feedback').innerHTML = '❌ Incorrect. ' + (result.message || '');
-          document.getElementById('alternatives').innerText = result.correct_translation ? 'Correct: ' + result.correct_translation : (result.correct_passive ? 'Correct: ' + result.correct_passive : '');
+          document.getElementById('mistake').innerText = result.mistake ? '🔍 Mistake: ' + result.mistake : '';
+          const correct = result.correct_translation || result.correct_passive || '';
+          document.getElementById('alternatives').innerText = correct ? 'Correct: ' + correct : '';
           document.getElementById('submit-btn').disabled = false;
         }
       } catch (err) { document.getElementById('feedback').innerText = 'Error: ' + err.message; document.getElementById('submit-btn').disabled = false; }
@@ -244,7 +250,7 @@
       document.getElementById('submit-btn').disabled = false;
     }
 
-    // ==================== AI असिस्टेंट (नया) ====================
+    // ==================== AI असिस्टेंट (हिंग्लिश, बटन) ====================
     const chatArea = document.getElementById('chat-area');
     const assistantInput = document.getElementById('assistant-input');
     const sendBtn = document.getElementById('send-assistant-btn');
@@ -258,17 +264,13 @@
       chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    // जाँचें कि क्या यह शब्द/वाक्यांश है (बिना प्रश्नवाचक चिह्न और छोटा)
     function isWordQuery(text) {
       const trimmed = text.trim();
-      // अगर ? या ! या . से खत्म हो, तो शायद सवाल है
       if (/[?.!]$/.test(trimmed)) return false;
       const words = trimmed.split(/\s+/);
-      // 4 से कम शब्द और कोई common question words नहीं
       if (words.length > 4) return false;
       const questionWords = ['क्या','क्यों','कैसे','किसने','किसको','कब','कहाँ','कितना'];
       if (questionWords.some(w => trimmed.toLowerCase().includes(w))) return false;
-      // मोटामोटी सही
       return true;
     }
 
@@ -283,10 +285,8 @@
       sendBtn.disabled = true;
 
       if (isWordQuery(text)) {
-        // बटन वाला मैसेज दिखाओ
         showWordOptions(text);
       } else {
-        // सामान्य चैट
         try {
           const reply = await callGroqAPIForAssistant([
             { role: "system", content: "You are a helpful English learning assistant. Answer in Hinglish (mix of Hindi and English). Keep it short and friendly." },
@@ -296,7 +296,6 @@
           assistantMessages.push({ role: "assistant", content: reply });
         } catch (err) {
           appendMessage('ai', '⚠️ Error: ' + err.message);
-          assistantMessages.push({ role: "assistant", content: 'Error: ' + err.message });
         }
       }
       sendBtn.disabled = false;
@@ -309,22 +308,19 @@
           <button class="option-btn" onclick="handleWordOption('${word.replace(/'/g, "\\'")}', 'english-translation', this)">🔄 English Translation</button>
         </div>`;
       appendMessage('ai', html, true);
-      // assistantMessages में न डालें, यह सिर्फ UI है
     }
 
     async function handleWordOption(word, option, btnElement) {
-      // बटन को डिसेबल करें
       const buttons = btnElement.parentElement.querySelectorAll('.option-btn');
       buttons.forEach(b => b.disabled = true);
       btnElement.style.background = '#ccc';
 
       let prompt = '';
       if (option === 'hindi-meaning') {
-        prompt = `User wants to know the meaning of "${word}" in Hindi (explain in Hinglish). Please provide a short definition and example sentence in Hinglish.`;
+        prompt = `User wants the Hindi meaning of "${word}". Explain in Hinglish with example.`;
       } else {
-        prompt = `User wants to translate "${word}" into English. Provide the English translation and, if necessary, a brief explanation in Hinglish.`;
+        prompt = `User wants the English translation of "${word}". Provide it and a brief explanation in Hinglish.`;
       }
-
       try {
         const reply = await callGroqAPIForAssistant([{ role: "user", content: prompt }], 0.7);
         appendMessage('ai', reply);
@@ -336,7 +332,6 @@
 
     sendBtn.addEventListener('click', sendAssistantMessage);
     assistantInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendAssistantMessage(); });
-
     document.getElementById('user-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('submit-btn').click(); });
   </script>
 </body>
