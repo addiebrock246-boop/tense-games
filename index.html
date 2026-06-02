@@ -141,7 +141,7 @@
   </div>
 
   <script>
-    // ========== सभी सवालों का डेटा (सीधे कोड में) ==========
+    // ========== सभी सवालों का डेटा ==========
     const questionBank = {
       present: [
         { hindi: "मैं रोज़ स्कूल जाता हूँ।", hint: "I go to school daily." },
@@ -263,7 +263,7 @@
       document.getElementById('alternatives').innerText = '';
     }
 
-    // Groq API को सीधे ब्राउज़र से कॉल – अब llma-3.1-8b-instant का प्रयोग करें
+    // Groq API कॉल – JSON mode के साथ और बेहतर पार्सिंग
     async function callGroqAPI(messages) {
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -272,21 +272,43 @@
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',  // यह मॉडल हमेशा उपलब्ध और फ्री है
+          model: 'llama-3.1-8b-instant',
           messages: messages,
           temperature: 0.3,
-          max_tokens: 300
+          max_tokens: 300,
+          response_format: { type: "json_object" }  // ज़रूरी – JSON mode ऑन
         })
       });
+
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.error?.message || 'API error');
       }
+
       const data = await response.json();
       let content = data.choices[0].message.content.trim();
-      if (content.startsWith('```json')) content = content.slice(7, -3).trim();
-      else if (content.startsWith('```')) content = content.slice(3, -3).trim();
-      return JSON.parse(content);
+
+      // JSON को साफ करने का सुरक्षित तरीका
+      // 1. पहले ```json ... ``` हटाएँ
+      if (content.startsWith('```json')) {
+        content = content.slice(7, -3).trim();
+      } else if (content.startsWith('```')) {
+        content = content.slice(3, -3).trim();
+      }
+
+      // 2. अगर फिर भी सीधा JSON न हो, तो पहला { और आखिरी } ढूँढकर पार्स करें
+      try {
+        return JSON.parse(content);
+      } catch (e) {
+        // स्ट्रिंग में से JSON ऑब्जेक्ट निकालें
+        const firstBrace = content.indexOf('{');
+        const lastBrace = content.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
+          const jsonPart = content.substring(firstBrace, lastBrace + 1);
+          return JSON.parse(jsonPart);
+        }
+        throw new Error('Could not extract JSON from AI response: ' + content);
+      }
     }
 
     document.getElementById('submit-btn').addEventListener('click', async () => {
@@ -361,7 +383,6 @@
         displayQuestion();
       } catch (err) {
         document.getElementById('feedback').innerText = 'AI generation failed. Reusing old questions.';
-        // पुराने पूल को दोबारा इस्तेमाल करो
         if (currentSection === 'mix') {
           currentQuestions = [...questionBank.present, ...questionBank.past, ...questionBank.future];
         } else if (currentSection === 'active-passive') {
