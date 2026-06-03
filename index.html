@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – All Sentence Types (Fixed)</title>
+  <title>English Tense Master – All Sentence Types (Final Fix)</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -130,7 +130,7 @@
       <header class="hero">
         <div class="hero-left">
           <h1>✨ English Tense Master ✨</h1>
-          <p class="tagline">Affirmative, Negative, Yes/No Q, WH-Q – अब सब सही</p>
+          <p class="tagline">Affirmative, Negative, Yes/No Q, WH-Q – सब कुछ</p>
         </div>
         <div class="timer-box"><span>⏱️</span> <span id="timerDisplay">00:00:00</span></div>
       </header>
@@ -271,7 +271,7 @@
       document.getElementById('feedback').innerText = '⚠️ नए सवाल की जनरेशन विफल।';
     }
 
-    // FIXED: Double Interrogative is now WH-questions with proper plural handling
+    // UPDATED generation prompt: includes time+hour examples
     async function tryGenerateQuestion(tense) {
       const usedList = usedQuestions.map(s => `"${s}"`).join(', ');
       let systemPrompt, userPrompt;
@@ -296,7 +296,8 @@
         - affirmative: normal positive sentence (e.g., "वह स्कूल जाता है।")
         - negative: negative sentence (e.g., "वह स्कूल नहीं जाता।")
         - interrogative: Yes/No question, starting with "क्या" (e.g., "क्या वह स्कूल जाता है?")
-        - double interrogative: WH-question, using question words like "कौन", "कौन से", "किसे", "किनको", "क्यों", "कब", "कैसे", "कहाँ", "किसने", "किसको", etc. If "कौन से" is used, the English translation MUST use "which" + plural noun (e.g., "कौन से विषय" → "which subjects"). (e.g., "वह कौन से विषय पढ़ता है?" → "Which subjects does he study?")`;
+        - double interrogative: WH-question, using question words like "कौन", "कौन से", "किसे", "किनको", "क्यों", "कब", "कैसे", "कहाँ", "किसने", "किसको", etc. If "कौन से" is used, the English translation MUST use "which" + plural noun (e.g., "कौन से विषय" → "which subjects"). 
+        Sometimes include time with specific hours like "सुबह 7 बजे", "शाम 5 बजे", "रात 10 बजे", etc. The English translation must include "at 7 a.m.", "at 5 p.m.", "at 10 p.m." etc.`;
         userPrompt = `Generate a ${type} Hindi sentence.`;
       }
       
@@ -322,7 +323,7 @@
       return str.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
     }
 
-    // FIXED VALIDATION with better handling for "which subjects" etc.
+    // FINAL FIXED VALIDATION – now handles clock times
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -349,6 +350,7 @@ CRITICAL TIME EXPRESSION MAPPING (never violate these):
 - "आज रात" → "tonight"
 - "कल सुबह" (future) → "tomorrow morning"
 - "कल सुबह" (past) → "yesterday morning"
+- When a clock time is given (e.g., "5 बजे", "7 बजे"), you MUST include it in the translation as "at 5", "at 7", "at 5 a.m./p.m.", etc. Never omit the clock hour. For example, "कल शाम 5 बजे" → "at 5 tomorrow evening" or "at 5 p.m. tomorrow".
 
 GRAMMAR RULES:
 - Check articles carefully. A singular countable noun needs an article unless a determiner is present.
