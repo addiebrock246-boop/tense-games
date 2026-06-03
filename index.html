@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Perfect Validation</title>
+  <title>English Tense Master – No More Omissions</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -130,7 +130,7 @@
       <header class="hero">
         <div class="hero-left">
           <h1>✨ English Tense Master ✨</h1>
-          <p class="tagline">अब कोई गलत सलाह नहीं – सटीक और भरोसेमंद</p>
+          <p class="tagline">कोई omission नहीं – समय और जगह, सब सही रहेगा</p>
         </div>
         <div class="timer-box"><span>⏱️</span> <span id="timerDisplay">00:00:00</span></div>
       </header>
@@ -296,7 +296,7 @@
         - negative: negative
         - interrogative: Yes/No question (क्या...)
         - double interrogative: WH-question (कौन, क्या, क्यों, कब, कहाँ, कैसे, कौन से, etc.)
-        Include time phrases like "सुबह 7 बजे", "शाम 5 बजे", "रात 10 बजे" occasionally.`;
+        Include time phrases and location phrases occasionally (e.g., "सिनेमाघर में", "स्कूल में", "पार्क में").`;
         userPrompt = `Generate a ${type} Hindi sentence.`;
       }
       
@@ -322,7 +322,7 @@
       return str.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
     }
 
-    // UPDATED VALIDATION – now properly handles part of day
+    // FINAL FIXED VALIDATION – no more omissions of time, part-of-day, or location
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -334,7 +334,7 @@
         systemPrompt = `Check if the passive voice sentence is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
-        systemPrompt = `You are an English teacher. Evaluate the user's translation of the Hindi sentence. Be precise and fair.
+        systemPrompt = `You are an English teacher. Evaluate the user's translation of the Hindi sentence. Be precise, fair, and never omit explicit details.
 
 TIME EXPRESSIONS (follow strictly):
 - "कल" (past) → "yesterday", (future) → "tomorrow"
@@ -348,12 +348,15 @@ TIME EXPRESSIONS (follow strictly):
   "सुबह 7 बजे" → "at 7 in the morning"
   "शाम 5 बजे" → "at 5 in the evening" or "at 5 p.m."
   "रात 10 बजे" → "at 10 at night"
-  Never drop the part of day when it's explicitly in the Hindi sentence. The user's translation that includes the part of day is CORRECT for time; do NOT mark it wrong.
+  Never drop the part of day when it's explicitly in the Hindi sentence.
+
+LOCATION EXPRESSIONS (never drop them):
+- If the Hindi sentence contains a location phrase like "सिनेमाघर में", "स्कूल में", "पार्क में", "घर पर", etc., the English translation MUST include the equivalent location (e.g., "in the cinema", "at the cinema", "at school", "in the park", "at home"). If the user omitted the location, mark INCORRECT but your "correct_translation" MUST include it. Never provide a correction that removes a location present in the Hindi.
 
 OTHER GRAMMAR:
-- "good/bad at" requires "be" verb, not "do". ("is he good at", not "does he good").
+- "good/bad at" requires "be" verb, not "do".
 - Check articles (a/an/the) and prepositions (go to school, not go school).
-- Minor word-order variations (e.g., "at 7 in the morning" vs "in the morning at 7") are both acceptable.
+- Passive voice: "दिखाई देती है" = "is shown", not "shows".
 - Before marking INCORRECT, if your own "correct_translation" is essentially identical to the user's answer (ignoring punctuation and case), mark CORRECT instead.
 
 Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }.`;
@@ -374,7 +377,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
             console.log('Overriding AI: identical answer forced to CORRECT');
           }
           score++; document.getElementById('score').innerText = score;
-          document.getElementById('feedback').innerHTML = '✅ Correct! ' + ((aiStatus === 'CORRECT') ? (result.message || '') : '(AI ने गलत सलाह दी, पर आपका जवाब सही है)');
+          document.getElementById('feedback').innerHTML = '✅ Correct! ' + ((aiStatus === 'CORRECT') ? (result.message || '') : '(AI ने गलती की, पर आपका जवाब बिल्कुल सही है)');
           document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
           document.getElementById('next-btn').style.display = 'inline-block';
         } else {
