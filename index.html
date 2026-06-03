@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Tense Master – Accurate Explanation</title>
+  <title>English Tense Master – Perfect Validation</title>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -130,7 +130,7 @@
       <header class="hero">
         <div class="hero-left">
           <h1>✨ English Tense Master ✨</h1>
-          <p class="tagline">सटीक पकड़, सही समझ – अब कोई बकवास नहीं</p>
+          <p class="tagline">अब कोई गलत सलाह नहीं – सटीक और भरोसेमंद</p>
         </div>
         <div class="timer-box"><span>⏱️</span> <span id="timerDisplay">00:00:00</span></div>
       </header>
@@ -285,18 +285,18 @@
         const type = types[Math.floor(Math.random() * types.length)];
         
         let tenseDesc = '';
-        if (tense === 'present') tenseDesc = 'any present subtype (Simple, Continuous, Perfect, Perfect Continuous)';
-        else if (tense === 'past') tenseDesc = 'any past subtype (Simple, Continuous, Perfect, Perfect Continuous)';
-        else if (tense === 'future') tenseDesc = 'any future subtype (Simple, Continuous, Perfect, Perfect Continuous)';
+        if (tense === 'present') tenseDesc = 'any present subtype';
+        else if (tense === 'past') tenseDesc = 'any past subtype';
+        else if (tense === 'future') tenseDesc = 'any future subtype';
         else tenseDesc = 'randomly choose among present/past/future subtypes';
         
-        systemPrompt = `Generate a new Hindi sentence for English translation. Tense/subtype: ${tenseDesc}. Sentence type: ${type}. Not in: [${usedList}]. Return JSON: { "hindi": "...", "type": "${type}" }.
-        Definitions:
-        - affirmative: normal positive sentence (e.g., "वह स्कूल जाता है।")
-        - negative: negative sentence (e.g., "वह स्कूल नहीं जाता।")
-        - interrogative: Yes/No question, starting with "क्या" (e.g., "क्या वह स्कूल जाता है?")
-        - double interrogative: WH-question, using question words like "कौन", "कौन से", "किसे", "किनको", "क्यों", "कब", "कैसे", "कहाँ", "किसने", "किसको", etc. If "कौन से" is used, the English translation MUST use "which" + plural noun (e.g., "कौन से विषय" → "which subjects"). 
-        Sometimes include time with specific hours like "सुबह 7 बजे", "शाम 5 बजे", "रात 10 बजे", etc. The English translation must include "at 7", "at 5", etc.`;
+        systemPrompt = `Generate a new Hindi sentence. Tense: ${tenseDesc}. Type: ${type}. Not in: [${usedList}]. Return JSON: { "hindi": "...", "type": "${type}" }.
+        Types:
+        - affirmative: positive
+        - negative: negative
+        - interrogative: Yes/No question (क्या...)
+        - double interrogative: WH-question (कौन, क्या, क्यों, कब, कहाँ, कैसे, कौन से, etc.)
+        Include time phrases like "सुबह 7 बजे", "शाम 5 बजे", "रात 10 बजे" occasionally.`;
         userPrompt = `Generate a ${type} Hindi sentence.`;
       }
       
@@ -322,7 +322,7 @@
       return str.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
     }
 
-    // UPDATED VALIDATION: Now includes rules for "good at", "bad at" and accurate explanations
+    // UPDATED VALIDATION – now properly handles part of day
     document.getElementById('submit-btn').addEventListener('click', async () => {
       if (!apiKey) { const gotKey = await askForApiKey(); if (!gotKey) return; }
       const userAnswer = document.getElementById('user-input').value.trim();
@@ -334,30 +334,27 @@
         systemPrompt = `Check if the passive voice sentence is correct. Active: "${currentQuestion.active}". Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_passive":"...", "alternatives":[...] }`;
         userPrompt = `User Passive: "${userAnswer}"`;
       } else {
-        systemPrompt = `You are an English teacher. Evaluate the user's translation of the Hindi sentence. Be accurate and educational.
+        systemPrompt = `You are an English teacher. Evaluate the user's translation of the Hindi sentence. Be precise and fair.
 
-CRITICAL TIME EXPRESSION MAPPING (never violate these):
-- "कल" in past context → "yesterday"
-- "कल" in future context → "tomorrow"
-- "परसों" (past) → "the day before yesterday"
-- "परसों" (future) → "the day after tomorrow"
+TIME EXPRESSIONS (follow strictly):
+- "कल" (past) → "yesterday", (future) → "tomorrow"
+- "परसों" (past) → "the day before yesterday", (future) → "the day after tomorrow"
 - "आज" → "today"
-- "शाम" (when combined with time like "कल शाम") → "evening" or "night" (both acceptable)
-- "कल शाम" (future) → "tomorrow evening" / "tomorrow night"
-- "कल रात" (future) → "tomorrow night"
-- "कल रात" (past) → "last night"
-- "आज रात" → "tonight"
-- "कल सुबह" (future) → "tomorrow morning"
-- "कल सुबह" (past) → "yesterday morning"
-- When a clock time is given (e.g., "7 बजे"), you MUST include it as "at 7". Accept both "at 7 in the morning" and "in the morning at 7" as correct.
+- "शाम" alone → "evening" / "night"
+- "सुबह" → "morning"
+- "रात" → "night"
+- When a clock hour is given (e.g., "7 बजे"), include it as "at 7". BUT if the Hindi also contains a part-of-day word ("शाम", "सुबह", "रात"), you MUST keep that part of day in English. 
+  Examples:
+  "सुबह 7 बजे" → "at 7 in the morning"
+  "शाम 5 बजे" → "at 5 in the evening" or "at 5 p.m."
+  "रात 10 बजे" → "at 10 at night"
+  Never drop the part of day when it's explicitly in the Hindi sentence. The user's translation that includes the part of day is CORRECT for time; do NOT mark it wrong.
 
-GRAMMAR RULES:
-- "good" / "bad" are adjectives; they require the verb "to be" (am/is/are/was/were). Never use "do/does" with "good" or "bad" (e.g., "does he good" is wrong, correct is "is he good at"). The structure is "is/are good at (something)".
-- For "कौन से विषय में अच्छा/खराब", the translation must use "is he good at" or "is he bad at".
-- Missing article 'a/an/the' or missing preposition (like "to" before "school") is a mistake; explain clearly what's missing.
-- When explaining mistakes, always provide the correct grammar rule, not made-up statements like "adjectives should be used with a singular noun". That is false; adjectives work with both singular and plural nouns.
-- If the user's answer has the correct meaning and only a minor error, mark INCORRECT but your message should be helpful, stating exactly what's wrong.
-- Before marking INCORRECT, verify that your own "correct_translation" is not essentially the same as the user's answer (ignoring punctuation, capitalization, and word order variations like "at 7 in the morning" vs "in the morning at 7"). If they match in meaning, mark CORRECT.
+OTHER GRAMMAR:
+- "good/bad at" requires "be" verb, not "do". ("is he good at", not "does he good").
+- Check articles (a/an/the) and prepositions (go to school, not go school).
+- Minor word-order variations (e.g., "at 7 in the morning" vs "in the morning at 7") are both acceptable.
+- Before marking INCORRECT, if your own "correct_translation" is essentially identical to the user's answer (ignoring punctuation and case), mark CORRECT instead.
 
 Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translation":"...", "alternatives":[...] }.`;
         userPrompt = `Hindi: "${currentQuestion.hindi}"\nUser English: "${userAnswer}"`;
@@ -377,7 +374,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
             console.log('Overriding AI: identical answer forced to CORRECT');
           }
           score++; document.getElementById('score').innerText = score;
-          document.getElementById('feedback').innerHTML = '✅ Correct! ' + ((aiStatus === 'CORRECT') ? (result.message || '') : '(AI ने गलती की, पर आपका जवाब बिल्कुल सही है)');
+          document.getElementById('feedback').innerHTML = '✅ Correct! ' + ((aiStatus === 'CORRECT') ? (result.message || '') : '(AI ने गलत सलाह दी, पर आपका जवाब सही है)');
           document.getElementById('alternatives').innerText = result.alternatives?.length ? 'Other ways: ' + result.alternatives.join(', ') : '';
           document.getElementById('next-btn').style.display = 'inline-block';
         } else {
@@ -400,7 +397,7 @@ Reply JSON: { "status":"CORRECT/INCORRECT", "message":"...", "correct_translatio
       assistantMessages.push({ role: "user", content: userMessageContent });
       appendMessage('user', userMessageContent);
       try {
-        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish. Point out specific grammar mistakes. Be accurate and logical. Never give false information.`;
+        const strictSystemPrompt = `You are a strict English grammar teacher. Always answer in Hinglish. Point out specific grammar mistakes. Be accurate and logical.`;
         const reply = await callGroqAPIForAssistant([{ role: "system", content: strictSystemPrompt }, ...assistantMessages], 0.7, 600);
         appendMessage('ai', reply);
         assistantMessages.push({ role: "assistant", content: reply });
